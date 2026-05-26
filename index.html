@@ -418,6 +418,27 @@ textarea.form-input{resize:vertical;min-height:70px}
   border-radius:8px;padding:8px;text-align:center;
 }
 .weapon-icon{font-size:1.3rem;margin-bottom:4px}
+.sig-check-dot{
+  width:22px;height:22px;border-radius:50%;flex-shrink:0;
+  border:2px solid var(--border);background:var(--bg-input);
+  display:flex;align-items:center;justify-content:center;transition:all .2s;
+}
+.sig-checked{background:var(--green);border-color:var(--green);}
+.weapon-check-dot{
+  position:absolute;top:5px;right:5px;width:20px;height:20px;border-radius:50%;
+  border:2px solid var(--border);background:var(--bg-input);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.65rem;transition:all .2s;
+}
+.weapon-card.checked{border-color:var(--app-color);background:rgba(26,111,196,0.1);}
+.weapon-card.checked .sig-check-dot{
+  width:22px;height:22px;border-radius:50%;flex-shrink:0;
+  border:2px solid var(--border);background:var(--bg-input);
+  display:flex;align-items:center;justify-content:center;transition:all .2s;
+}
+.sig-checked{background:var(--green);border-color:var(--green);}
+.weapon-check-dot{background:var(--green);border-color:var(--green);color:white;}
+
 .weapon-label{font-size:.62rem;font-weight:700;color:var(--text-secondary);font-family:'Rajdhani',sans-serif;letter-spacing:.5px;text-transform:uppercase;line-height:1.2;margin-bottom:6px}
 
 /* Indicativos tags */
@@ -1268,32 +1289,20 @@ textarea.form-input{resize:vertical;min-height:70px}
 
         <div class="form-divider">Armamento y medios especiales</div>
         <div class="weapon-grid">
-          <div class="weapon-card">
+          <div class="weapon-card" id="wcard-arma_larga" onclick="toggleWeapon('arma_larga')" style="cursor:pointer;position:relative;transition:all .2s">
             <div class="weapon-icon"><img id="rifle-icon-form" style="height:22px;object-fit:contain"></div>
             <div class="weapon-label">Arma Larga</div>
-            <div class="num-input">
-              <button class="num-btn" onclick="changeNum('w-arma-larga',-1)">−</button>
-              <input type="number" class="num-val" id="w-arma-larga" value="0" min="0">
-              <button class="num-btn" onclick="changeNum('w-arma-larga',1)">+</button>
-            </div>
+            <div id="wcheck-arma_larga" class="weapon-check-dot"></div>
           </div>
-          <div class="weapon-card">
+          <div class="weapon-card" id="wcard-dec" onclick="toggleWeapon('dec')" style="cursor:pointer;position:relative;transition:all .2s">
             <div class="weapon-icon">⚡</div>
-            <div class="weapon-label">DEC (Taser)</div>
-            <div class="num-input">
-              <button class="num-btn" onclick="changeNum('w-dec',-1)">−</button>
-              <input type="number" class="num-val" id="w-dec" value="0" min="0">
-              <button class="num-btn" onclick="changeNum('w-dec',1)">+</button>
-            </div>
+            <div class="weapon-label">DEC</div>
+            <div id="wcheck-dec" class="weapon-check-dot"></div>
           </div>
-          <div class="weapon-card">
+          <div class="weapon-card" id="wcard-pinchos" onclick="toggleWeapon('pinchos')" style="cursor:pointer;position:relative;transition:all .2s">
             <div class="weapon-icon">🔺</div>
-            <div class="weapon-label">Barrera Pinchos</div>
-            <div class="num-input">
-              <button class="num-btn" onclick="changeNum('w-pinchos',-1)">−</button>
-              <input type="number" class="num-val" id="w-pinchos" value="0" min="0">
-              <button class="num-btn" onclick="changeNum('w-pinchos',1)">+</button>
-            </div>
+            <div class="weapon-label">Pinchos</div>
+            <div id="wcheck-pinchos" class="weapon-check-dot"></div>
           </div>
         </div>
 
@@ -1714,19 +1723,13 @@ function wizardNext(){
     };
     wizardStep=2;
   } else if(wizardStep===2){
-    var sig = {};
-    signalItems.forEach(function(s){
-      var v = parseInt(document.getElementById('sig-val-'+s.id)?.textContent)||0;
-      if(v>0) sig[s.id] = v;
-    });
-    // Save 'otra' description
+    // Signal checkboxes are updated live via toggleSig, just grab 'otra' description
     var otraDesc = document.getElementById('sig-otra-desc');
-    if(otraDesc && otraDesc.value.trim()) sig['otra_desc'] = otraDesc.value.trim();
-    currentDOE.señalizacion = sig;
+    if(otraDesc) currentDOE.señalizacion['otra_desc'] = otraDesc.value.trim();
     currentDOE.armamento = {
-      arma_larga: parseInt(document.getElementById('w-arma-larga').value)||0,
-      dec: parseInt(document.getElementById('w-dec').value)||0,
-      pinchos: parseInt(document.getElementById('w-pinchos').value)||0,
+      arma_larga: !!(currentDOE.armamento && currentDOE.armamento.arma_larga),
+      dec: !!(currentDOE.armamento && currentDOE.armamento.dec),
+      pinchos: !!(currentDOE.armamento && currentDOE.armamento.pinchos),
     };
     wizardStep=3;
   } else if(wizardStep===3){
@@ -1747,6 +1750,7 @@ function populateStep1(){
   document.getElementById('doe-mandos').value = currentDOE.mandos||0;
   renderIndicativos();
   updateMandosPanel();
+  if(typeof refreshWeaponUI==='function') setTimeout(refreshWeaponUI,0);
   var linkPreview = document.getElementById('location-link-preview');
   if(linkPreview) linkPreview.style.display = currentDOE.lugarLink ? 'block' : 'none';
 }
@@ -1850,18 +1854,34 @@ function changeNum(id, d){
 /* ========== SIGNAL GRID ========== */
 function renderSignalGrid(){
   var grid = document.getElementById('signal-grid');
+  var sig = currentDOE.señalizacion||{};
   grid.innerHTML = signalItems.map(function(s){
-    var current = (currentDOE.señalizacion && currentDOE.señalizacion[s.id])||0;
+    var checked = sig[s.id]===true || (sig[s.id]&&sig[s.id]>0);
     var iconHtml = s.id==='cinta'
       ? '<div style="width:30px;height:13px;border-radius:3px;background:repeating-linear-gradient(90deg,#1565c0 0,#1565c0 6px,#fff 6px,#fff 12px);border:1px solid #555;flex-shrink:0"></div>'
       : '<span style="font-size:1.1rem;line-height:1">'+s.icon+'</span>';
-    var extraRow = (s.id==='otra')
-      ? '<div style="display:'+(current>0?'block':'none')+';margin-top:4px;padding:0 2px" id="sig-otra-wrap"><input class="form-input" id="sig-otra-desc" placeholder="Describe el tipo de señal..." style="font-size:.78rem;padding:6px 8px" value="'+(currentDOE.señalizacion&&currentDOE.señalizacion.otra_desc||'')+'"></div>'
+    var chk = checked
+      ? '<svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:white"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>'
       : '';
-    return '<div style="grid-column:1/-1"><div class="signal-item'+(current>0?' active':'')+'"><div class="signal-item-icon">'+iconHtml+'</div><div class="signal-item-info"><div class="signal-item-name">'+s.name+'</div></div><div class="signal-item-count"><button class="signal-count-btn" onclick="changeSig(\''+s.id+'\',-1)">−</button><div class="signal-count-val" id="sig-val-'+s.id+'">'+current+'</div><button class="signal-count-btn" onclick="changeSig(\''+s.id+'\',1)">+</button></div></div>'+extraRow+'</div>';
+    var dotStyle = checked
+      ? 'background:var(--green);border-color:var(--green);'
+      : '';
+    var extra = s.id==='otra'
+      ? '<div style="display:'+(checked?'block':'none')+';margin-top:4px" id="sig-otra-wrap"><input class="form-input" id="sig-otra-desc" placeholder="Describe el tipo de señal..." style="font-size:.78rem;padding:6px 8px" value="'+(sig.otra_desc||'')+'"></div>'
+      : '';
+    return '<div><div class="signal-item'+(checked?' active':'')+'" onclick="toggleSig(\'"+s.id+"\')" style="cursor:pointer">'
+      +'<div class="signal-item-icon">'+iconHtml+'</div>'
+      +'<div class="signal-item-info"><div class="signal-item-name">'+s.name+'</div></div>'
+      +'<div class="sig-check-dot" style="'+dotStyle+'">'+chk+'</div>'
+      +'</div>'+extra+'</div>';
   }).join('');
 }
 
+function toggleSig(id){
+  if(!currentDOE.señalizacion) currentDOE.señalizacion={};
+  currentDOE.señalizacion[id] = !currentDOE.señalizacion[id];
+  renderSignalGrid();
+}
 function changeSig(id, d){
   var el = document.getElementById('sig-val-'+id);
   if(!el) return;
@@ -1903,9 +1923,9 @@ function renderPreview(){
   }).filter(Boolean).join('<br>');
   var arm = d.armamento||{};
   var armList = [
-    arm.arma_larga>0 ? '🔫 Arma larga: '+arm.arma_larga : '',
-    arm.dec>0 ? '⚡ DEC: '+arm.dec : '',
-    arm.pinchos>0 ? '🔺 Barrera pinchos: '+arm.pinchos : '',
+    (arm.arma_larga===true||arm.arma_larga>0) ? '🔫 Arma larga: Sí' : '',
+    (arm.dec===true||arm.dec>0) ? '⚡ DEC: Sí' : '',
+    (arm.pinchos===true||arm.pinchos>0) ? '🔺 Barrera pinchos: Sí' : '',
   ].filter(Boolean).join('<br>');
 
   document.getElementById('doe-preview').innerHTML = '<div style="background:var(--bg-input);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">\
@@ -2109,7 +2129,7 @@ function buildElementsPanel(d){
   var arm = d.armamento||{};
 
   // DEC — solo símbolo ⚡, sin nombre debajo
-  if((arm.dec||0)>0){
+  if(arm.dec===true||arm.dec>0){
     var decChips = [];
     for(var i=0;i<arm.dec;i++){
       decChips.push('<div class="elem-chip" onclick="addDecToCanvas()"><div style="font-size:1.3rem;line-height:1">⚡</div></div>');
@@ -2118,7 +2138,7 @@ function buildElementsPanel(d){
   }
 
   // Arma larga — icono fusil SVG negro
-  if((arm.arma_larga||0)>0){
+  if(arm.arma_larga===true||arm.arma_larga>0){
     var rifleChips = [];
     for(var i=0;i<arm.arma_larga;i++){
       rifleChips.push('<div class="elem-chip" onclick="addRifleToCanvas()"><img src="'+getRifleSVGDataURL()+'" style="height:22px;object-fit:contain"></div>');
@@ -2423,9 +2443,24 @@ function setToolColor(el){
 }
 
 var _drawOrig = {x:0,y:0};
+var _isPanning=false, _panLast={x:0,y:0};
+
+function _evtPoint(e){
+  if(e.touches&&e.touches.length) return {x:e.touches[0].clientX,y:e.touches[0].clientY};
+  return {x:e.clientX,y:e.clientY};
+}
+
 function onCanvasMouseDown(opt){
-  if(editorTool==='select') return;
   if(!fabricCanvas) return;
+  if(editorTool==='select'){
+    // Start panning only when clicking on empty canvas (no object)
+    if(!opt.target){
+      _isPanning=true;
+      _panLast=_evtPoint(opt.e);
+      fabricCanvas.setCursor('grab');
+    }
+    return;
+  }
   var pointer = fabricCanvas.getPointer(opt.e);
   _drawOrig = {x:pointer.x, y:pointer.y};
   isDrawingShape = true;
@@ -2475,6 +2510,13 @@ function onCanvasMouseDown(opt){
 }
 
 function onCanvasMouseMove(opt){
+  if(_isPanning && fabricCanvas){
+    var p=_evtPoint(opt.e);
+    fabricCanvas.relativePan(new fabric.Point(p.x-_panLast.x, p.y-_panLast.y));
+    _panLast=p;
+    fabricCanvas.renderAll();
+    return;
+  }
   if(!isDrawingShape || !activeShape || !fabricCanvas) return;
   var pointer = fabricCanvas.getPointer(opt.e);
   var ox=_drawOrig.x, oy=_drawOrig.y;
@@ -2497,6 +2539,11 @@ function onCanvasMouseMove(opt){
 }
 
 function onCanvasMouseUp(opt){
+  if(_isPanning){
+    _isPanning=false;
+    if(fabricCanvas) fabricCanvas.setCursor('default');
+    return;
+  }
   if(!isDrawingShape || !fabricCanvas) return;
   isDrawingShape=false;
   if(activeShape){
@@ -3286,14 +3333,32 @@ function setColor(el){
 }
 
 /* ========== BACKUP ========== */
-function exportBackup(){
-  var payload = {version:1,timestamp:Date.now(),does:loadDB(),settings:loadSettings()};
-  var blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'DOEs-backup-'+new Date().toISOString().split('T')[0]+'.json';
+async function exportBackup(){
+  var payload={version:1,timestamp:Date.now(),does:loadDB(),settings:loadSettings()};
+  var jsonStr=JSON.stringify(payload,null,2);
+  var dateStr=new Date().toISOString().split('T')[0];
+  var fname='DOEs-backup-'+dateStr+'.json';
+
+  // On mobile: try Web Share API first so file goes to any app (WhatsApp, Drive, etc.)
+  if(navigator.share && /Mobi|Android/i.test(navigator.userAgent)){
+    try{
+      var file=new File([jsonStr],fname,{type:'application/json'});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){
+        await navigator.share({title:'DOEs Backup',files:[file]});
+        showToast('Backup compartido','💾');
+        return;
+      }
+    }catch(e){ if(e.name==='AbortError') return; }
+  }
+  // Desktop / fallback: force download as octet-stream → always goes to Downloads folder
+  var blob=new Blob([jsonStr],{type:'application/octet-stream'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=fname;
+  document.body.appendChild(a);
   a.click();
-  showToast('Backup exportado','💾');
+  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(a.href);},500);
+  showToast('Backup guardado en Descargas','💾');
 }
 
 function importBackup(e){
