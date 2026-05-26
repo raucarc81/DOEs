@@ -1014,7 +1014,7 @@ textarea.form-input{resize:vertical;min-height:70px}
           <div class="settings-icon">📲</div>
           <div class="settings-info">
             <div class="settings-label">Instalar DOEs como app</div>
-            <div class="settings-sub" id="install-status-text">Disponible para instalar en este dispositivo</div>
+            <div class="settings-sub" id="install-status-text">Toca para ver instrucciones de instalación</div>
           </div>
           <div class="settings-action">
             <button class="btn btn-primary" id="install-settings-btn" style="padding:8px 14px;font-size:.72rem" onclick="triggerInstall()">Instalar</button>
@@ -1702,7 +1702,7 @@ function renderWizardStep(){
   document.getElementById('btn-next').innerHTML = wizardStep<3
     ? 'Continuar<svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>'
     : '<svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>Guardar DOE';
-  if(wizardStep===2) renderSignalGrid();
+  if(wizardStep===2){ renderSignalGrid(); refreshWeaponUI(); }
   if(wizardStep===3) renderPreview();
 }
 
@@ -1854,6 +1854,7 @@ function changeNum(id, d){
 /* ========== SIGNAL GRID ========== */
 function renderSignalGrid(){
   var grid = document.getElementById('signal-grid');
+  if(!grid) return;
   var sig = currentDOE.señalizacion||{};
   grid.innerHTML = signalItems.map(function(s){
     var checked = sig[s.id]===true || (sig[s.id]&&sig[s.id]>0);
@@ -1863,18 +1864,23 @@ function renderSignalGrid(){
     var chk = checked
       ? '<svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:white"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>'
       : '';
-    var dotStyle = checked
-      ? 'background:var(--green);border-color:var(--green);'
-      : '';
+    var dotStyle = checked ? 'background:var(--green);border-color:var(--green);' : '';
     var extra = s.id==='otra'
-      ? '<div style="display:'+(checked?'block':'none')+';margin-top:4px" id="sig-otra-wrap"><input class="form-input" id="sig-otra-desc" placeholder="Describe el tipo de señal..." style="font-size:.78rem;padding:6px 8px" value="'+(sig.otra_desc||'')+'"></div>'
+      ? '<div style="display:'+(checked?'block':'none')+';margin-top:4px" id="sig-otra-wrap">'
+        +'<input class="form-input" id="sig-otra-desc" placeholder="Describe el tipo de señal..." style="font-size:.78rem;padding:6px 8px" value="'+(sig.otra_desc||'')+'"></div>'
       : '';
-    return '<div><div class="signal-item'+(checked?' active':'')+'" onclick="toggleSig(\'"+s.id+"\')" style="cursor:pointer">'
+    return '<div>'
+      +'<div class="signal-item'+(checked?' active':'')+'" data-sig-id="'+s.id+'" style="cursor:pointer">'
       +'<div class="signal-item-icon">'+iconHtml+'</div>'
       +'<div class="signal-item-info"><div class="signal-item-name">'+s.name+'</div></div>'
       +'<div class="sig-check-dot" style="'+dotStyle+'">'+chk+'</div>'
       +'</div>'+extra+'</div>';
   }).join('');
+  // Event delegation - no inline onclick escaping issues
+  grid.onclick = function(e){
+    var item = e.target.closest('.signal-item');
+    if(item && item.dataset.sigId) toggleSig(item.dataset.sigId);
+  };
 }
 
 function toggleSig(id){
@@ -1882,6 +1888,23 @@ function toggleSig(id){
   currentDOE.señalizacion[id] = !currentDOE.señalizacion[id];
   renderSignalGrid();
 }
+function toggleWeapon(id){
+  if(!currentDOE.armamento) currentDOE.armamento={};
+  currentDOE.armamento[id] = !currentDOE.armamento[id];
+  refreshWeaponUI();
+}
+function refreshWeaponUI(){
+  ['arma_larga','dec','pinchos'].forEach(function(id){
+    var v = !!(currentDOE.armamento && currentDOE.armamento[id]);
+    var card = document.getElementById('wcard-'+id);
+    var dot = document.getElementById('wcheck-'+id);
+    if(card) card.classList.toggle('checked', v);
+    if(dot) dot.innerHTML = v
+      ? '<svg viewBox="0 0 24 24" style="width:11px;height:11px;fill:white"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>'
+      : '';
+  });
+}
+
 function changeSig(id, d){
   var el = document.getElementById('sig-val-'+id);
   if(!el) return;
@@ -2298,8 +2321,21 @@ function triggerInstall(){
 function updateInstallUI(state){
   var btn=document.getElementById('install-settings-btn');
   var txt=document.getElementById('install-status-text');
-  if(state==='installed'){if(btn){btn.textContent='Instalada ✓';btn.disabled=true;}if(txt)txt.textContent='App instalada';}
-  else if(state==='available'){if(btn){btn.textContent='Instalar ahora!';btn.disabled=false;}if(txt)txt.textContent='Disponible para instalar';}
+  if(state==='installed'){
+    if(btn){btn.textContent='✓ Instalada';btn.disabled=true;btn.style.opacity='.5';}
+    if(txt)txt.textContent='App instalada en tu dispositivo';
+    var banner=document.getElementById('install-banner');
+    if(banner) banner.classList.remove('show');
+  } else if(state==='available'){
+    if(btn){btn.textContent='⬇ Instalar ahora';btn.disabled=false;btn.style.opacity='1';}
+    if(txt)txt.textContent='Lista para instalar — toca para añadir';
+    var banner=document.getElementById('install-banner');
+    if(banner) banner.classList.add('show');
+  } else {
+    // Default: show instructions button
+    if(btn){btn.textContent='📲 Cómo instalar';btn.disabled=false;btn.style.opacity='1';}
+    if(txt)txt.textContent='No instalada — toca para ver instrucciones';
+  }
 }
 
 /* ===== FABRIC CANVAS INIT ===== */
@@ -3424,6 +3460,12 @@ document.addEventListener('DOMContentLoaded',function(){
   applySettings();
   renderDOEList();
   injectVehicleCardSVGs();
+  // PWA install state on load
+  if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone){
+    updateInstallUI('installed');
+  } else {
+    updateInstallUI('default');
+  }
 });
 
 /* ===== ELEMENTS PANEL TOGGLE ===== */

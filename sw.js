@@ -1,4 +1,4 @@
-const CACHE = 'does-v7';
+const CACHE = 'does-v8';
 const ASSETS = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', e => {
