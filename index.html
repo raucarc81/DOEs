@@ -2265,12 +2265,12 @@ function triggerInstall(){
   var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
   var isSafari=/^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   var msg=isIOS&&isSafari?'iOS Safari: toca el boton compartir y selecciona Añadir a pantalla de inicio':isIOS?'Abre esta URL en Safari para instalar':'Android Chrome: menu de tres puntos → Instalar aplicacion';
-  var html='<div style="position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:20px" id="inst-guide" onclick="if(event.target.id==='inst-guide')this.remove()">'
+  var html='<div style="position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:20px" id="inst-guide" onclick="if(event.target.id===\'inst-guide\')this.remove()">'
     +'<div style="background:var(--bg-secondary);border-radius:16px;padding:22px;max-width:320px;width:100%;border:1px solid var(--border-bright);text-align:center">'
     +'<div style="font-size:2.5rem;margin-bottom:10px">📲</div>'
     +'<div style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:1rem;color:var(--text-primary);margin-bottom:12px">Instalar DOEs</div>'
     +'<div style="font-size:.82rem;color:var(--text-secondary);line-height:1.7;margin-bottom:16px">'+msg+'</div>'
-    +'<button onclick="document.getElementById('inst-guide').remove()" class="btn btn-primary" style="width:100%">Entendido</button>'
+    +'<button onclick="document.getElementById(\'inst-guide\').remove()" class="btn btn-primary" style="width:100%">Entendido</button>'
     +'</div></div>';
   document.body.insertAdjacentHTML('beforeend',html);
 }
