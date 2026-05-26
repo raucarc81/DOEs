@@ -1,0 +1,3371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0d13">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DOEs">
+<title>DOEs</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+/* ===== VARIABLES & RESET ===== */
+:root {
+  --bg-primary: #080b10;
+  --bg-secondary: #0d1117;
+  --bg-card: #111720;
+  --bg-card2: #161e2a;
+  --bg-input: #0d1520;
+  --border: #1e2d42;
+  --border-bright: #2a3f5a;
+  --accent: #1a6fc4;
+  --accent2: #0e9de0;
+  --accent-glow: rgba(26,111,196,0.35);
+  --gold: #c9a227;
+  --gold-light: #e8c547;
+  --red: #c0392b;
+  --red-glow: rgba(192,57,43,0.4);
+  --green: #27ae60;
+  --text-primary: #e8edf5;
+  --text-secondary: #8a9bb0;
+  --text-dim: #4a5a6e;
+  --shadow: 0 4px 24px rgba(0,0,0,0.6);
+  --shadow-lg: 0 8px 48px rgba(0,0,0,0.8);
+  --radius: 14px;
+  --radius-sm: 8px;
+  --app-color: #1a6fc4;
+  --app-color-glow: rgba(26,111,196,0.35);
+}
+[data-theme="light"] {
+  --bg-primary: #e8ecf0;
+  --bg-secondary: #f0f4f8;
+  --bg-card: #ffffff;
+  --bg-card2: #f5f8fc;
+  --bg-input: #eef2f7;
+  --border: #d0dae8;
+  --border-bright: #b0c0d8;
+  --text-primary: #1a2535;
+  --text-secondary: #4a6080;
+  --text-dim: #8099b8;
+  --shadow: 0 4px 24px rgba(0,0,0,0.12);
+  --shadow-lg: 0 8px 48px rgba(0,0,0,0.18);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--bg-primary);color:var(--text-primary);font-family:'Exo 2',sans-serif;overscroll-behavior:none}
+button{cursor:pointer;border:none;outline:none;font-family:inherit}
+input,select,textarea{outline:none;font-family:inherit}
+a{text-decoration:none;color:inherit}
+/* No horizontal scroll anywhere */
+*{max-width:100%;}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border-bright);border-radius:4px}
+
+/* ===== APP SHELL ===== */
+#app{height:100dvh;display:flex;flex-direction:column;overflow:hidden;position:relative}
+
+/* ===== SCANLINE OVERLAY ===== */
+#app::before{
+  content:'';position:fixed;top:0;left:0;right:0;bottom:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);
+  pointer-events:none;z-index:9999;opacity:.4
+}
+
+/* ===== HEADER ===== */
+.header{
+  background:linear-gradient(180deg,var(--bg-secondary) 0%,var(--bg-primary) 100%);
+  border-bottom:1px solid var(--border);
+  padding:0 16px;
+  flex-shrink:0;
+  position:relative;
+  z-index:100;
+}
+.header-inner{
+  display:flex;align-items:center;justify-content:space-between;
+  height:60px;max-width:700px;margin:0 auto;
+}
+.header-logo{
+  display:flex;align-items:center;gap:10px;
+}
+.logo-badge{
+  width:40px;height:40px;border-radius:10px;
+  background:linear-gradient(135deg,var(--app-color) 0%,#0e4a8a 100%);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 16px var(--app-color-glow),inset 0 1px 0 rgba(255,255,255,0.1);
+  overflow:hidden;flex-shrink:0;
+}
+.logo-badge img{width:100%;height:100%;object-fit:cover;border-radius:10px}
+.logo-badge svg{width:22px;height:22px;fill:white}
+.logo-text{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.6rem;letter-spacing:3px;color:var(--text-primary)}
+.logo-text span{color:var(--app-color)}
+.logo-sub{font-size:.55rem;color:var(--text-dim);letter-spacing:2px;font-family:'Share Tech Mono',monospace;text-transform:uppercase;margin-top:-2px}
+.header-actions{display:flex;gap:8px;align-items:center}
+.btn-icon{
+  width:38px;height:38px;border-radius:10px;
+  background:var(--bg-card);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-secondary);transition:all .2s;
+}
+.btn-icon:hover,.btn-icon:active{background:var(--bg-card2);border-color:var(--border-bright);color:var(--text-primary)}
+.btn-icon svg{width:18px;height:18px;fill:currentColor}
+
+/* ===== PAGES ===== */
+.page{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  padding:16px;padding-bottom:80px;
+  display:none;
+  animation:fadeIn .25s ease;
+}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.page-inner{max-width:700px;margin:0 auto}
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:200;
+  background:var(--bg-secondary);
+  border-top:1px solid var(--border);
+  display:flex;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.nav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:8px 4px;gap:3px;color:var(--text-dim);
+  transition:color .2s;font-size:.6rem;letter-spacing:.5px;font-weight:600;
+  font-family:'Rajdhani',sans-serif;text-transform:uppercase;
+  position:relative;
+}
+.nav-item.active{color:var(--app-color)}
+.nav-item.active::before{
+  content:'';position:absolute;top:0;left:20%;right:20%;height:2px;
+  background:var(--app-color);border-radius:0 0 3px 3px;
+  box-shadow:0 0 8px var(--app-color-glow);
+}
+.nav-item svg{width:22px;height:22px;fill:currentColor}
+
+/* ===== HOME - DOE LIST ===== */
+.section-title{
+  font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.7rem;
+  letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;
+  margin-bottom:12px;display:flex;align-items:center;gap:8px;
+}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.fab{
+  width:100%;padding:16px;border-radius:var(--radius);
+  background:linear-gradient(135deg,var(--app-color) 0%,#0d5ba8 100%);
+  color:white;font-family:'Rajdhani',sans-serif;font-weight:700;
+  font-size:1.05rem;letter-spacing:2px;text-transform:uppercase;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  box-shadow:0 4px 20px var(--app-color-glow),inset 0 1px 0 rgba(255,255,255,0.15);
+  transition:all .2s;margin-bottom:20px;
+  border:1px solid rgba(255,255,255,0.08);
+  position:relative;overflow:hidden;
+}
+.fab::before{
+  content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);
+  transition:left .4s;
+}
+.fab:hover::before,.fab:active::before{left:100%}
+.fab:active{transform:scale(0.98)}
+.fab svg{width:20px;height:20px;fill:white}
+
+.doe-list{display:flex;flex-direction:column;gap:10px}
+.doe-empty{
+  text-align:center;padding:48px 20px;
+  background:var(--bg-card);border:1px dashed var(--border);
+  border-radius:var(--radius);
+}
+.doe-empty-icon{width:56px;height:56px;margin:0 auto 14px;opacity:.3}
+.doe-empty-icon svg{width:56px;height:56px;fill:var(--text-secondary)}
+.doe-empty h3{font-family:'Rajdhani',sans-serif;font-size:1.1rem;letter-spacing:1px;color:var(--text-secondary);margin-bottom:6px}
+.doe-empty p{font-size:.8rem;color:var(--text-dim);line-height:1.5}
+
+.doe-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+  transition:border-color .2s,box-shadow .2s;
+  position:relative;
+}
+.doe-card:hover,.doe-card:active{border-color:var(--border-bright);box-shadow:var(--shadow)}
+.doe-card-stripe{
+  position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--app-color),#0e4a8a);
+}
+.doe-card-inner{padding:14px 14px 14px 18px;display:flex;align-items:center;gap:12px}
+.doe-card-badge{
+  width:44px;height:44px;border-radius:10px;flex-shrink:0;
+  background:var(--bg-input);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.7rem;
+  color:var(--app-color);letter-spacing:1px;
+}
+.doe-card-info{flex:1;min-width:0}
+.doe-card-title{
+  font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1rem;
+  letter-spacing:.5px;color:var(--text-primary);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.doe-card-meta{display:flex;gap:10px;margin-top:3px;flex-wrap:wrap}
+.doe-meta-chip{
+  font-size:.65rem;color:var(--text-dim);font-family:'Share Tech Mono',monospace;
+  display:flex;align-items:center;gap:4px;
+}
+.doe-meta-chip svg{width:10px;height:10px;fill:currentColor}
+.doe-card-status{
+  padding:4px 8px;border-radius:6px;font-size:.6rem;font-weight:700;
+  font-family:'Rajdhani',sans-serif;letter-spacing:1px;text-transform:uppercase;
+  flex-shrink:0;
+}
+.doe-card-status.borrador{background:rgba(201,162,39,0.15);color:var(--gold);border:1px solid rgba(201,162,39,0.3)}
+.doe-card-status.finalizado{background:rgba(39,174,96,0.12);color:var(--green);border:1px solid rgba(39,174,96,0.25)}
+.doe-card-actions{display:flex;gap:6px;padding:0 14px 12px 18px}
+.doe-action-btn{
+  flex:1;padding:8px;border-radius:8px;font-size:.7rem;font-weight:600;
+  font-family:'Rajdhani',sans-serif;letter-spacing:1px;text-transform:uppercase;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  transition:all .15s;
+}
+.doe-action-btn svg{width:12px;height:12px;fill:currentColor}
+.doe-action-btn.edit{background:var(--bg-input);border:1px solid var(--border);color:var(--text-secondary)}
+.doe-action-btn.edit:hover{background:var(--bg-card2);color:var(--text-primary)}
+.doe-action-btn.view{background:rgba(26,111,196,0.1);border:1px solid rgba(26,111,196,0.25);color:var(--accent2)}
+.doe-action-btn.view:hover{background:rgba(26,111,196,0.2)}
+.doe-action-btn.del{background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.2);color:var(--red)}
+.doe-action-btn.del:hover{background:rgba(192,57,43,0.15)}
+
+/* ===== MODAL / WIZARD ===== */
+.modal-overlay{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);
+  display:none;align-items:flex-end;justify-content:center;
+}
+.modal-overlay.active{display:flex;animation:overlayIn .2s ease}
+@keyframes overlayIn{from{opacity:0}to{opacity:1}}
+.modal{
+  width:100%;max-width:700px;max-height:92dvh;
+  background:var(--bg-secondary);
+  border-radius:20px 20px 0 0;
+  border-top:1px solid var(--border-bright);
+  display:flex;flex-direction:column;
+  animation:slideUp .3s cubic-bezier(.32,.72,0,1);
+  overflow:hidden;
+}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:var(--border-bright);border-radius:2px;margin:10px auto 0}
+.modal-header{
+  padding:14px 16px 12px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+}
+.modal-title{
+  font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.1rem;
+  letter-spacing:2px;text-transform:uppercase;color:var(--text-primary);
+  display:flex;align-items:center;gap:8px;
+}
+.modal-title .step-badge{
+  background:var(--app-color);color:white;
+  width:22px;height:22px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.75rem;font-weight:700;
+}
+.modal-close{
+  width:32px;height:32px;border-radius:8px;
+  background:var(--bg-card);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-secondary);transition:all .15s;
+}
+.modal-close:hover{background:rgba(192,57,43,0.15);color:var(--red);border-color:rgba(192,57,43,0.3)}
+.modal-close svg{width:16px;height:16px;fill:currentColor}
+.modal-progress{height:3px;background:var(--border);flex-shrink:0}
+.modal-progress-bar{height:100%;background:linear-gradient(90deg,var(--app-color),var(--accent2));transition:width .3s ease;border-radius:0 2px 2px 0}
+.modal-body{flex:1;overflow-y:auto;padding:16px}
+.modal-footer{
+  padding:12px 16px;border-top:1px solid var(--border);
+  display:flex;gap:8px;flex-shrink:0;
+  padding-bottom:max(12px,env(safe-area-inset-bottom));
+  background:var(--bg-secondary);
+}
+
+/* ===== STEPS ===== */
+.step{display:none}
+.step.active{display:block;animation:fadeIn .2s ease}
+
+/* ===== FORM ELEMENTS ===== */
+.form-group{margin-bottom:14px}
+.form-label{
+  display:flex;align-items:center;gap:6px;
+  font-size:.72rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--text-secondary);margin-bottom:6px;
+  font-family:'Rajdhani',sans-serif;
+}
+.form-label svg{width:14px;height:14px;fill:currentColor;opacity:.7}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-input{
+  width:100%;padding:11px 13px;
+  background:var(--bg-input);border:1px solid var(--border);
+  border-radius:var(--radius-sm);color:var(--text-primary);
+  font-size:.9rem;transition:border-color .2s,box-shadow .2s;
+}
+.form-input:focus{border-color:var(--app-color);box-shadow:0 0 0 3px var(--app-color-glow)}
+.form-input::placeholder{color:var(--text-dim)}
+select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238a9bb0'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;background-size:20px;padding-right:32px}
+textarea.form-input{resize:vertical;min-height:70px}
+
+/* Número spinner */
+.num-input{
+  display:flex;align-items:center;gap:0;
+  background:var(--bg-input);border:1px solid var(--border);
+  border-radius:var(--radius-sm);overflow:hidden;
+  transition:border-color .2s,box-shadow .2s;
+}
+.num-input:focus-within{border-color:var(--app-color);box-shadow:0 0 0 3px var(--app-color-glow)}
+.num-btn{
+  width:38px;height:42px;background:var(--bg-card2);
+  color:var(--text-secondary);font-size:1.2rem;font-weight:700;
+  transition:all .15s;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+}
+.num-btn:hover,.num-btn:active{background:var(--app-color);color:white}
+.num-val{
+  flex:1;text-align:center;background:transparent;border:none;
+  color:var(--text-primary);font-size:.95rem;font-weight:600;
+  font-family:'Share Tech Mono',monospace;
+  padding:0 4px;height:42px;
+}
+.num-val::-webkit-inner-spin-button,.num-val::-webkit-outer-spin-button{-webkit-appearance:none}
+
+/* Divider */
+.form-divider{
+  display:flex;align-items:center;gap:8px;margin:16px 0 14px;
+  font-size:.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--text-dim);font-family:'Rajdhani',sans-serif;
+}
+.form-divider::before,.form-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* Vehículo tipo grid */
+.vehicle-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.vehicle-card{
+  background:var(--bg-input);border:2px solid var(--border);
+  border-radius:10px;padding:10px 8px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  cursor:pointer;transition:all .2s;position:relative;
+}
+.vehicle-card.selected{border-color:var(--app-color);background:rgba(26,111,196,0.08);box-shadow:0 0 12px var(--app-color-glow)}
+.vehicle-card-icon{font-size:1.5rem}
+.vehicle-card-label{font-size:.65rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text-secondary);font-family:'Rajdhani',sans-serif;text-align:center}
+.vehicle-card-count{
+  position:absolute;top:4px;right:4px;
+  background:var(--app-color);color:white;
+  width:18px;height:18px;border-radius:50%;
+  font-size:.6rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Share Tech Mono',monospace;
+}
+
+/* Señalización chips */
+.signal-grid{display:flex;flex-direction:column;gap:7px}
+.signal-item{
+  background:var(--bg-input);border:1px solid var(--border);
+  border-radius:8px;padding:8px 10px;
+  display:flex;align-items:center;gap:8px;
+  cursor:pointer;transition:all .2s;
+}
+.signal-item.active{border-color:var(--gold);background:rgba(201,162,39,0.07)}
+.signal-item-icon{font-size:1.1rem;flex-shrink:0;width:22px;text-align:center}
+.signal-item-info{flex:1;min-width:0}
+.signal-item-name{font-size:.72rem;font-weight:600;color:var(--text-secondary);font-family:'Rajdhani',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.signal-item-count{
+  display:flex;align-items:center;gap:0;
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:6px;overflow:hidden;flex-shrink:0;
+}
+.signal-count-btn{
+  width:22px;height:26px;background:transparent;
+  color:var(--text-secondary);font-size:.9rem;font-weight:700;
+  transition:all .15s;display:flex;align-items:center;justify-content:center;
+}
+.signal-count-btn:hover{background:var(--app-color);color:white}
+.signal-count-val{
+  width:24px;text-align:center;
+  font-size:.75rem;font-weight:700;color:var(--text-primary);
+  font-family:'Share Tech Mono',monospace;
+  line-height:26px;
+}
+
+/* Mando rango */
+.rank-list{display:flex;flex-direction:column;gap:7px}
+.rank-item{
+  background:var(--bg-input);border:1px solid var(--border);
+  border-radius:8px;padding:10px 12px;
+  display:flex;align-items:center;gap:10px;
+}
+.rank-stripes{display:flex;gap:3px;align-items:center;flex-shrink:0}
+.stripe{height:14px;width:4px;border-radius:2px}
+.stripe.silver{background:linear-gradient(180deg,#d0d8e8,#a0aab8)}
+.stripe.gold{background:linear-gradient(180deg,#f0c040,#c09020)}
+.rank-name{flex:1;font-size:.82rem;font-weight:600;color:var(--text-secondary);font-family:'Rajdhani',sans-serif;letter-spacing:.5px}
+
+/* Armamento */
+.weapon-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.weapon-card{
+  background:var(--bg-input);border:1px solid var(--border);
+  border-radius:8px;padding:8px;text-align:center;
+}
+.weapon-icon{font-size:1.3rem;margin-bottom:4px}
+.weapon-label{font-size:.62rem;font-weight:700;color:var(--text-secondary);font-family:'Rajdhani',sans-serif;letter-spacing:.5px;text-transform:uppercase;line-height:1.2;margin-bottom:6px}
+
+/* Indicativos tags */
+.indicativo-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.indicativo-tag{
+  background:rgba(26,111,196,0.12);border:1px solid rgba(26,111,196,0.3);
+  color:var(--accent2);padding:4px 8px;border-radius:6px;
+  font-size:.72rem;font-weight:700;font-family:'Rajdhani',sans-serif;letter-spacing:1px;
+  display:flex;align-items:center;gap:5px;cursor:pointer;
+}
+.indicativo-tag-remove{opacity:.6;font-size:.9rem}
+.indicativo-tag-remove:hover{opacity:1}
+.indicativo-input-row{display:flex;gap:6px;margin-top:6px}
+.indicativo-input-row .form-input{flex:1}
+.btn-add-tag{
+  padding:0 14px;background:var(--app-color);color:white;
+  border-radius:var(--radius-sm);font-weight:700;font-size:.8rem;
+  font-family:'Rajdhani',sans-serif;letter-spacing:1px;
+  display:flex;align-items:center;gap:4px;white-space:nowrap;
+  transition:all .15s;
+}
+.btn-add-tag:active{transform:scale(.97)}
+.btn-add-tag svg{width:14px;height:14px;fill:white}
+
+/* Nomenclatura vehículos */
+.nomenclatura-list{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.nomenclatura-item{display:flex;align-items:center;gap:8px;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;padding:6px 10px}
+.nomenclatura-item-icon{font-size:.9rem;flex-shrink:0}
+.nomenclatura-item-label{font-size:.7rem;color:var(--text-dim);font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:.5px;width:56px;flex-shrink:0}
+.nomenclatura-item .form-input{flex:1;padding:5px 8px;font-size:.82rem;height:32px}
+
+/* ===== BUTTONS ===== */
+.btn{
+  padding:12px 20px;border-radius:10px;font-family:'Rajdhani',sans-serif;
+  font-weight:700;font-size:.9rem;letter-spacing:1.5px;text-transform:uppercase;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:all .2s;flex:1;
+}
+.btn svg{width:16px;height:16px;fill:currentColor;flex-shrink:0}
+.btn-primary{
+  background:linear-gradient(135deg,var(--app-color) 0%,#0d5ba8 100%);
+  color:white;box-shadow:0 4px 16px var(--app-color-glow);
+  border:1px solid rgba(255,255,255,0.08);
+}
+.btn-primary:hover,.btn-primary:active{filter:brightness(1.1);transform:translateY(-1px)}
+.btn-secondary{
+  background:var(--bg-card);border:1px solid var(--border);color:var(--text-secondary);
+}
+.btn-secondary:hover,.btn-secondary:active{background:var(--bg-card2);color:var(--text-primary)}
+.btn-danger{
+  background:rgba(192,57,43,0.12);border:1px solid rgba(192,57,43,0.3);
+  color:var(--red);
+}
+.btn-danger:hover{background:rgba(192,57,43,0.2)}
+
+/* ===== STATS PAGE ===== */
+.stats-filters{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px}
+.stats-filter{
+  padding:7px 14px;border-radius:20px;white-space:nowrap;
+  background:var(--bg-card);border:1px solid var(--border);
+  font-size:.72rem;font-weight:700;font-family:'Rajdhani',sans-serif;
+  letter-spacing:1px;color:var(--text-secondary);transition:all .2s;flex-shrink:0;
+}
+.stats-filter.active{
+  background:var(--app-color);border-color:var(--app-color);
+  color:white;box-shadow:0 2px 10px var(--app-color-glow);
+}
+.kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
+.kpi-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:12px;
+}
+.kpi-label{font-size:.62rem;font-weight:700;letter-spacing:1.5px;color:var(--text-dim);text-transform:uppercase;font-family:'Rajdhani',sans-serif;margin-bottom:4px}
+.kpi-value{font-size:1.6rem;font-weight:700;color:var(--text-primary);font-family:'Share Tech Mono',monospace;line-height:1}
+.kpi-sub{font-size:.65rem;color:var(--text-dim);margin-top:2px}
+.kpi-card.highlight{border-color:var(--app-color);background:rgba(26,111,196,0.06)}
+.kpi-card.highlight .kpi-value{color:var(--accent2)}
+
+/* Chart placeholder */
+.chart-wrap{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px;margin-bottom:12px;
+}
+.chart-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:1.5px;color:var(--text-secondary);text-transform:uppercase;margin-bottom:10px}
+#stats-chart{width:100%;max-width:300px;display:block;margin:0 auto}
+.stats-list{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+}
+.stats-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 14px;border-bottom:1px solid var(--border);
+}
+.stats-row:last-child{border-bottom:none}
+.stats-row-label{font-size:.82rem;color:var(--text-secondary);display:flex;align-items:center;gap:8px}
+.stats-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.stats-row-val{font-family:'Share Tech Mono',monospace;font-size:.9rem;font-weight:700;color:var(--text-primary)}
+
+/* ===== SETTINGS ===== */
+.settings-section{margin-bottom:20px}
+.settings-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.settings-row{
+  display:flex;align-items:center;gap:12px;padding:13px 14px;
+  border-bottom:1px solid var(--border);
+}
+.settings-row:last-child{border-bottom:none}
+.settings-icon{
+  width:36px;height:36px;border-radius:9px;flex-shrink:0;
+  background:var(--bg-input);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1rem;
+}
+.settings-info{flex:1;min-width:0}
+.settings-label{font-size:.85rem;font-weight:600;color:var(--text-primary);font-family:'Rajdhani',sans-serif;letter-spacing:.5px}
+.settings-sub{font-size:.7rem;color:var(--text-dim);margin-top:1px}
+.settings-action{flex-shrink:0}
+
+/* Toggle switch */
+.toggle{position:relative;display:inline-block;width:44px;height:24px}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{
+  position:absolute;inset:0;background:var(--bg-input);
+  border:1px solid var(--border);border-radius:24px;cursor:pointer;
+  transition:.3s;
+}
+.toggle-slider::before{
+  content:'';position:absolute;width:18px;height:18px;
+  left:2px;top:2px;background:var(--text-dim);border-radius:50%;
+  transition:.3s;
+}
+.toggle input:checked+.toggle-slider{background:var(--app-color);border-color:var(--app-color)}
+.toggle input:checked+.toggle-slider::before{transform:translateX(20px);background:white}
+
+/* Color palette */
+.color-palette{display:flex;gap:8px;flex-wrap:wrap}
+.color-dot{
+  width:30px;height:30px;border-radius:50%;cursor:pointer;
+  border:2px solid transparent;transition:all .2s;
+}
+.color-dot.selected{border-color:white;transform:scale(1.15);box-shadow:0 0 0 2px rgba(255,255,255,0.3)}
+
+/* Logo uploader */
+.logo-uploader{
+  display:flex;align-items:center;gap:12px;
+  background:var(--bg-input);border:2px dashed var(--border);
+  border-radius:10px;padding:12px;cursor:pointer;
+  transition:all .2s;
+}
+.logo-uploader:hover{border-color:var(--app-color)}
+.logo-preview{
+  width:50px;height:50px;border-radius:8px;
+  background:var(--bg-card2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;
+}
+.logo-preview img{width:100%;height:100%;object-fit:contain}
+.logo-preview svg{width:24px;height:24px;fill:var(--text-dim)}
+.logo-uploader-info h4{font-size:.85rem;font-weight:600;color:var(--text-primary);font-family:'Rajdhani',sans-serif}
+.logo-uploader-info p{font-size:.7rem;color:var(--text-dim);margin-top:2px}
+
+/* ===== CONFIRM MODAL ===== */
+.confirm-modal{
+  position:fixed;inset:0;z-index:600;
+  background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+.confirm-modal.active{display:flex;animation:fadeIn .2s ease}
+.confirm-box{
+  background:var(--bg-secondary);border:1px solid var(--border-bright);
+  border-radius:16px;padding:24px;max-width:320px;width:100%;
+  text-align:center;animation:popIn .2s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.confirm-icon{font-size:2rem;margin-bottom:10px}
+.confirm-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.1rem;letter-spacing:1px;color:var(--text-primary);margin-bottom:6px}
+.confirm-text{font-size:.8rem;color:var(--text-secondary);line-height:1.5;margin-bottom:18px}
+.confirm-actions{display:flex;gap:8px}
+
+/* ===== TOAST ===== */
+.toast{
+  position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-80px);
+  z-index:700;
+  background:var(--bg-card2);border:1px solid var(--border-bright);
+  border-radius:10px;padding:10px 16px;
+  display:flex;align-items:center;gap:8px;
+  box-shadow:var(--shadow-lg);
+  font-size:.82rem;font-weight:600;font-family:'Rajdhani',sans-serif;letter-spacing:.5px;
+  color:var(--text-primary);
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+  white-space:nowrap;
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast-icon{font-size:1rem}
+
+/* ===== INSTALL BANNER ===== */
+.install-banner{
+  background:linear-gradient(135deg,rgba(26,111,196,0.15),rgba(14,77,138,0.1));
+  border:1px solid rgba(26,111,196,0.25);
+  border-radius:var(--radius);padding:12px 14px;
+  display:none;align-items:center;gap:10px;margin-bottom:14px;
+}
+.install-banner.show{display:flex}
+.install-banner-text{flex:1;font-size:.78rem;color:var(--accent2);font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:.5px}
+.install-banner-btn{
+  padding:7px 12px;background:var(--app-color);color:white;
+  border-radius:8px;font-size:.72rem;font-weight:700;
+  font-family:'Rajdhani',sans-serif;letter-spacing:1px;
+  flex-shrink:0;
+}
+
+/* ===== SHARE CHANNELS ===== */
+#share-channels{
+  display:none;flex-wrap:wrap;gap:6px;
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:12px;margin-bottom:10px;
+}
+#share-channels.open{display:flex}
+
+/* Date picker row */
+.stats-date-picker-wrap{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+}
+.stats-date-picker-wrap .form-input{
+  padding:8px 10px;font-size:.82rem;flex:1;min-width:0;
+}
+.stats-date-label{
+  font-size:.68rem;font-weight:700;color:var(--text-dim);
+  font-family:'Rajdhani',sans-serif;letter-spacing:1px;text-transform:uppercase;
+  white-space:nowrap;flex-shrink:0;
+}
+
+/* Misc */
+.mt-8{margin-top:8px}
+.mt-12{margin-top:12px}
+.text-center{text-align:center}
+.text-dim{color:var(--text-dim);font-size:.78rem}
+
+/* ===== DOE DETAIL PAGE ===== */
+#page-doe-detail{
+  position:fixed;inset:0;z-index:300;
+  background:var(--bg-primary);
+  display:none;flex-direction:column;
+  animation:slideInRight .25s cubic-bezier(.32,.72,0,1);
+}
+#page-doe-detail.active{display:flex}
+@keyframes slideInRight{from{transform:translateX(100%)}to{transform:translateX(0)}}
+
+.detail-header{
+  background:var(--bg-secondary);border-bottom:1px solid var(--border);
+  padding:0 12px;display:flex;align-items:center;gap:10px;
+  height:56px;flex-shrink:0;z-index:10;
+}
+.detail-back{
+  width:36px;height:36px;border-radius:9px;
+  background:var(--bg-card);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-secondary);flex-shrink:0;
+}
+.detail-back svg{width:20px;height:20px;fill:currentColor}
+.detail-title{flex:1;min-width:0}
+.detail-title h2{
+  font-family:'Rajdhani',sans-serif;font-weight:700;
+  font-size:.95rem;letter-spacing:1px;color:var(--text-primary);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.detail-title p{font-size:.65rem;color:var(--text-dim);font-family:'Share Tech Mono',monospace}
+
+/* Detail tabs */
+.detail-tabs{
+  display:flex;background:var(--bg-secondary);
+  border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.detail-tab{
+  flex:1;padding:10px 4px;text-align:center;
+  font-family:'Rajdhani',sans-serif;font-weight:700;
+  font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--text-dim);border-bottom:2px solid transparent;
+  transition:all .2s;cursor:pointer;
+}
+.detail-tab.active{color:var(--app-color);border-bottom-color:var(--app-color)}
+.detail-tab-content{display:none;flex:1;overflow:hidden;flex-direction:column}
+.detail-tab-content.active{display:flex}
+
+/* ===== MAPA EDITOR ===== */
+.editor-wrap{
+  flex:1;position:relative;overflow:hidden;
+  background:#000;
+}
+.editor-canvas-container{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+}
+#editor-canvas{touch-action:none}
+
+/* Floating toolbar */
+.editor-toolbar{
+  position:absolute;bottom:0;left:0;right:0;z-index:20;
+  background:linear-gradient(0deg,rgba(8,11,16,.98) 0%,rgba(8,11,16,.9) 100%);
+  border-top:1px solid var(--border);
+  padding:10px 12px;
+  padding-bottom:max(10px,env(safe-area-inset-bottom));
+}
+.toolbar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.toolbar-row:last-child{margin-bottom:0}
+.toolbar-label{
+  font-size:.6rem;font-weight:700;letter-spacing:1.5px;color:var(--text-dim);
+  font-family:'Rajdhani',sans-serif;text-transform:uppercase;flex-shrink:0;width:52px;
+}
+.tool-btns{display:flex;gap:6px;flex-wrap:wrap}
+.tool-btn{
+  padding:7px 10px;border-radius:8px;
+  background:var(--bg-card);border:1px solid var(--border);
+  color:var(--text-secondary);font-size:.75rem;font-weight:700;
+  font-family:'Rajdhani',sans-serif;letter-spacing:.5px;
+  display:flex;align-items:center;gap:5px;
+  transition:all .15s;white-space:nowrap;
+}
+.tool-btn svg{width:14px;height:14px;fill:currentColor;flex-shrink:0}
+.tool-btn.active{
+  background:var(--app-color);border-color:var(--app-color);
+  color:white;box-shadow:0 2px 8px var(--app-color-glow);
+}
+.tool-btn:active{transform:scale(.95)}
+.color-tools{display:flex;gap:6px}
+.color-tool{
+  width:26px;height:26px;border-radius:50%;cursor:pointer;
+  border:2px solid transparent;transition:all .15s;
+}
+.color-tool.active{border-color:white;transform:scale(1.2);box-shadow:0 0 8px rgba(255,255,255,.4)}
+.toolbar-action-btns{display:flex;gap:6px;margin-left:auto}
+.tbar-btn{
+  padding:7px 10px;border-radius:8px;font-size:.72rem;font-weight:700;
+  font-family:'Rajdhani',sans-serif;letter-spacing:1px;
+  display:flex;align-items:center;gap:4px;transition:all .15s;
+}
+.tbar-btn svg{width:13px;height:13px;fill:currentColor}
+.tbar-btn.undo{background:var(--bg-card);border:1px solid var(--border);color:var(--text-secondary)}
+.tbar-btn.clear{background:rgba(192,57,43,.12);border:1px solid rgba(192,57,43,.25);color:var(--red)}
+.tbar-btn.finish{background:linear-gradient(135deg,var(--green),#1a8a48);border:1px solid rgba(39,174,96,.3);color:white;box-shadow:0 2px 8px rgba(39,174,96,.25)}
+
+/* Elements panel */
+.elements-panel{
+  background:var(--bg-secondary);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.elements-panel-toggle{
+  padding:8px 12px;display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;
+}
+.elements-panel-toggle-label{
+  font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.7rem;
+  letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;
+  display:flex;align-items:center;gap:6px;
+}
+.elements-panel-toggle-label svg{width:14px;height:14px;fill:currentColor}
+.elements-panel-toggle-arrow{
+  width:20px;height:20px;fill:var(--text-dim);
+  transition:transform .2s;
+}
+.elements-panel.open .elements-panel-toggle-arrow{transform:rotate(180deg)}
+.elements-panel-body{
+  display:none;padding:8px 12px 10px;
+  overflow-x:auto;
+}
+.elements-panel.open .elements-panel-body{display:flex;gap:6px}
+.elem-group{flex-shrink:0;margin-right:6px}
+.elem-group-title{
+  font-size:.58rem;font-weight:700;letter-spacing:1.5px;color:var(--text-dim);
+  font-family:'Rajdhani',sans-serif;text-transform:uppercase;margin-bottom:5px;
+}
+.elem-row{display:flex;gap:5px}
+.elem-chip{
+  padding:6px 8px;border-radius:8px;
+  background:var(--bg-card);border:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  cursor:pointer;transition:all .15s;min-width:46px;
+}
+.elem-chip:active{transform:scale(.92);background:var(--bg-card2)}
+.elem-chip-icon{font-size:1.1rem;line-height:1}
+.elem-chip-label{font-size:.55rem;font-weight:700;color:var(--text-dim);font-family:'Rajdhani',sans-serif;text-align:center;letter-spacing:.3px;white-space:nowrap}
+
+/* Canvas no-map placeholder */
+.canvas-no-map{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:10px;
+  background:var(--bg-primary);pointer-events:none;
+}
+.canvas-no-map.hidden{display:none}
+
+/* Finalized view */
+.map-finalized{
+  position:absolute;inset:0;z-index:15;
+  background:var(--bg-primary);
+  display:none;flex-direction:column;
+}
+.map-finalized.active{display:flex}
+.map-finalized-img{flex:1;object-fit:contain;width:100%}
+.map-finalized-actions{
+  padding:10px 12px;padding-bottom:max(10px,env(safe-area-inset-bottom));
+  display:flex;gap:8px;background:var(--bg-secondary);border-top:1px solid var(--border);
+}
+
+/* ===== RESULTADOS ===== */
+.resultados-scroll{flex:1;overflow-y:auto;padding:14px}
+.resultados-scroll .page-inner{max-width:700px;margin:0 auto}
+.resultado-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.resultado-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:10px;padding:10px 12px;
+}
+.resultado-label{
+  font-size:.62rem;font-weight:700;letter-spacing:1px;color:var(--text-dim);
+  text-transform:uppercase;font-family:'Rajdhani',sans-serif;margin-bottom:6px;line-height:1.3;
+}
+.resultado-card .num-input{height:38px}
+.resultado-card .num-btn{height:38px;width:34px}
+.resultado-card .num-val{height:38px;font-size:.9rem}
+
+/* ===== PDF ACTIONS ===== */
+.pdf-actions{
+  padding:14px 12px;
+  padding-bottom:max(14px,env(safe-area-inset-bottom));
+  display:flex;flex-direction:column;gap:8px;
+  background:var(--bg-secondary);border-top:1px solid var(--border);
+  flex-shrink:0;
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js"></script>
+</head>
+<body>
+<div id="app">
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="header-logo">
+      <div class="logo-badge" id="header-logo-wrap">
+        <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 4l5 2.18V11c0 3.5-2.33 6.79-5 7.93-2.67-1.14-5-4.43-5-7.93V7.18L12 5zm-2 5v2h4V10h-4zm0 3v2h4v-2h-4z"/></svg>
+      </div>
+      <div>
+        <div class="logo-text"><span id="header-name-display">DO</span>Es</div>
+        <div class="logo-sub" id="header-org-display">Dispositivos Operativos</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-icon" onclick="navTo('settings')" title="Ajustes">
+        <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- PAGES -->
+
+<!-- HOME -->
+<div class="page active" id="page-home">
+  <div class="page-inner">
+    <div class="install-banner" id="install-banner">
+      <span class="install-banner-text">📲 Instala DOEs como app en tu dispositivo</span>
+      <button class="install-banner-btn" id="install-btn">Instalar</button>
+    </div>
+    <button class="fab" onclick="openWizard()">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+      Añadir DOE
+    </button>
+    <div class="section-title">Dispositivos registrados</div>
+    <div class="doe-list" id="doe-list">
+      <!-- populated by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="page" id="page-stats">
+  <div class="page-inner">
+    <div class="section-title">Estadísticas</div>
+    <div class="stats-filters">
+      <button class="stats-filter active" id="sf-hoy"    onclick="setStatsFilter('hoy',this)">Hoy</button>
+      <button class="stats-filter"        id="sf-semana" onclick="setStatsFilter('semana',this)">Semana</button>
+      <button class="stats-filter"        id="sf-mes"    onclick="setStatsFilter('mes',this)">Mes</button>
+      <button class="stats-filter"        id="sf-anio"   onclick="setStatsFilter('anio',this)">Año</button>
+      <button class="stats-filter"        id="sf-total"  onclick="setStatsFilter('total',this)">Total</button>
+    </div>
+
+    <!-- Date picker — changes based on selected filter -->
+    <div id="stats-date-picker" style="margin-bottom:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <!-- injected by JS -->
+    </div>
+
+    <div id="stats-period-label" style="font-size:.72rem;color:var(--text-dim);font-family:'Rajdhani',sans-serif;letter-spacing:1px;margin-bottom:10px;text-transform:uppercase"></div>
+
+    <div class="kpi-grid" id="kpi-grid"><!-- JS --></div>
+
+    <div class="chart-wrap">
+      <div class="chart-title">Distribución de resultados</div>
+      <canvas id="stats-chart" height="300"></canvas>
+    </div>
+
+    <div class="stats-list" id="stats-list"><!-- JS --></div>
+
+    <!-- Export + Share -->
+    <div style="display:flex;gap:8px;margin-top:12px;margin-bottom:4px">
+      <button class="btn btn-primary" style="flex:1" onclick="exportStatsPDF()">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg>
+        Exportar PDF
+      </button>
+      <button class="btn btn-secondary" style="flex:1" onclick="shareStatsPDF()">
+        <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>
+        Compartir
+      </button>
+    </div>
+
+    <!-- Share channels -->
+    <div id="share-channels" style="display:none;gap:8px;margin-bottom:12px">
+      <div style="font-size:.65rem;font-weight:700;letter-spacing:1.5px;color:var(--text-dim);font-family:'Rajdhani',sans-serif;text-transform:uppercase;width:100%;margin-bottom:4px">Compartir por:</div>
+      <button class="btn" style="flex:1;background:#25D366;color:white;border:none;padding:10px 8px;font-size:.75rem" onclick="shareViaWhatsApp()">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        WhatsApp
+      </button>
+      <button class="btn" style="flex:1;background:#229ED9;color:white;border:none;padding:10px 8px;font-size:.75rem" onclick="shareViaTelegram()">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:white"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        Telegram
+      </button>
+      <button class="btn" style="flex:1;background:#EA4335;color:white;border:none;padding:10px 8px;font-size:.75rem" onclick="shareViaEmail()">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:white"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+        Email
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="page" id="page-settings">
+  <div class="page-inner">
+    <div class="section-title">Ajustes</div>
+
+    <div class="settings-section">
+      <div class="section-title">Identidad</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div class="settings-icon">🏛️</div>
+          <div class="settings-info">
+            <div class="settings-label">Logo de la unidad</div>
+            <div class="settings-sub">Se mostrará en cabecera y PDFs</div>
+          </div>
+          <div class="settings-action">
+            <label class="logo-uploader" style="gap:8px;padding:8px 10px;cursor:pointer">
+              <div class="logo-preview" id="logo-preview-small">
+                <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+              </div>
+              <span style="font-size:.72rem;color:var(--accent2);font-weight:700;font-family:'Rajdhani',sans-serif;letter-spacing:1px">CAMBIAR</span>
+              <input type="file" accept="image/*" id="logo-input" style="display:none" onchange="handleLogoUpload(event)">
+            </label>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-icon">🔤</div>
+          <div class="settings-info">
+            <div class="settings-label">Nombre de la unidad</div>
+            <div class="settings-sub">Aparece en cabecera y documentos</div>
+          </div>
+          <div class="settings-action">
+            <input class="form-input" id="org-name-input" style="width:160px;text-align:right;padding:7px 10px;font-size:.82rem" placeholder="Comisaría..." onchange="saveOrgName()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="section-title">Instalación</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div class="settings-icon">📲</div>
+          <div class="settings-info">
+            <div class="settings-label">Instalar DOEs como app</div>
+            <div class="settings-sub" id="install-status-text">Disponible para instalar en este dispositivo</div>
+          </div>
+          <div class="settings-action">
+            <button class="btn btn-primary" id="install-settings-btn" style="padding:8px 14px;font-size:.72rem" onclick="triggerInstall()">Instalar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="section-title">Apariencia</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div class="settings-icon">🌙</div>
+          <div class="settings-info">
+            <div class="settings-label">Modo oscuro</div>
+            <div class="settings-sub">Tema por defecto: oscuro</div>
+          </div>
+          <div class="settings-action">
+            <label class="toggle">
+              <input type="checkbox" id="dark-toggle" checked onchange="toggleTheme(this.checked)">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-icon">🎨</div>
+          <div class="settings-info">
+            <div class="settings-label">Color de acento</div>
+            <div class="settings-sub">Color principal de la app</div>
+          </div>
+          <div class="settings-action">
+            <div class="color-palette" id="color-palette">
+              <div class="color-dot selected" style="background:#1a6fc4" data-color="#1a6fc4" data-glow="rgba(26,111,196,.35)" onclick="setColor(this)"></div>
+              <div class="color-dot" style="background:#16a34a" data-color="#16a34a" data-glow="rgba(22,163,74,.35)" onclick="setColor(this)"></div>
+              <div class="color-dot" style="background:#9333ea" data-color="#9333ea" data-glow="rgba(147,51,234,.35)" onclick="setColor(this)"></div>
+              <div class="color-dot" style="background:#dc2626" data-color="#dc2626" data-glow="rgba(220,38,38,.35)" onclick="setColor(this)"></div>
+              <div class="color-dot" style="background:#d97706" data-color="#d97706" data-glow="rgba(217,119,6,.35)" onclick="setColor(this)"></div>
+              <div class="color-dot" style="background:#0891b2" data-color="#0891b2" data-glow="rgba(8,145,178,.35)" onclick="setColor(this)"></div>
+              <div class="color-dot" style="background:#be185d" data-color="#be185d" data-glow="rgba(190,24,93,.35)" onclick="setColor(this)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="section-title">Datos</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div class="settings-icon">💾</div>
+          <div class="settings-info">
+            <div class="settings-label">Exportar backup</div>
+            <div class="settings-sub">Guarda todos los datos en un archivo</div>
+          </div>
+          <div class="settings-action">
+            <button class="btn btn-secondary" style="padding:8px 14px;font-size:.72rem" onclick="exportBackup()">Exportar</button>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-icon">📂</div>
+          <div class="settings-info">
+            <div class="settings-label">Importar backup</div>
+            <div class="settings-sub">Restaura datos desde archivo</div>
+          </div>
+          <div class="settings-action">
+            <label style="cursor:pointer">
+              <span class="btn btn-secondary" style="padding:8px 14px;font-size:.72rem;display:inline-flex">Importar</span>
+              <input type="file" accept=".json" style="display:none" onchange="importBackup(event)">
+            </label>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-icon">🗑️</div>
+          <div class="settings-info">
+            <div class="settings-label">Borrar todos los datos</div>
+            <div class="settings-sub">Elimina todos los DOEs guardados</div>
+          </div>
+          <div class="settings-action">
+            <button class="btn btn-danger" style="padding:8px 14px;font-size:.72rem" onclick="confirmDeleteAll()">Borrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center text-dim mt-12">DOEs v1.0 · Dispositivos Operativos Especiales</div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item active" id="nav-home" onclick="navTo('home')">
+    <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+    Inicio
+  </button>
+  <button class="nav-item" id="nav-stats" onclick="navTo('stats')">
+    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+    Estadísticas
+  </button>
+  <button class="nav-item" id="nav-settings" onclick="navTo('settings')">
+    <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+    Ajustes
+  </button>
+</nav>
+
+<!-- WIZARD MODAL -->
+<div class="modal-overlay" id="wizard-overlay">
+  <div class="modal" id="wizard-modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">
+        <div class="step-badge" id="wizard-step-badge">1</div>
+        <span id="wizard-step-title">Datos del DOE</span>
+      </div>
+      <button class="modal-close" onclick="closeWizard()">
+        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
+    </div>
+    <div class="modal-progress"><div class="modal-progress-bar" id="wizard-progress" style="width:33%"></div></div>
+    <div class="modal-body">
+
+      <!-- STEP 1: Datos generales -->
+      <div class="step active" id="step-1">
+        <div class="form-group">
+          <div class="form-label">
+            <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+            Fecha
+          </div>
+          <input type="date" class="form-input" id="doe-fecha">
+        </div>
+        <div class="form-group">
+          <div class="form-label">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Lugar del dispositivo
+          </div>
+          <div style="display:flex;gap:6px">
+            <input type="text" class="form-input" id="doe-lugar" placeholder="Ej: Av. de la Constitución, 12..." style="flex:1">
+            <button type="button" class="btn-add-tag" onclick="openMapsForLocation()" title="Buscar en Google Maps" style="flex-shrink:0;padding:0 12px">
+              <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:white"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            </button>
+          </div>
+          <div id="location-link-preview" style="display:none;margin-top:5px;font-size:.7rem;color:var(--accent2);font-family:'Rajdhani',sans-serif">📍 Enlace Maps guardado</div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.56 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+            Indicativo/s actuante/s
+          </div>
+          <div class="indicativo-input-row">
+            <input type="text" class="form-input" id="indicativo-input" placeholder="Ej: UCS-42, BRIXIA-1...">
+            <button class="btn-add-tag" onclick="addIndicativo()">
+              <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+              Añadir
+            </button>
+          </div>
+          <div class="indicativo-tags" id="indicativo-tags"></div>
+        </div>
+        <div class="form-divider">Configuración del dispositivo</div>
+        <div class="form-group">
+          <div class="form-label">
+            <svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
+            Tipos de vehículos
+          </div>
+          <div class="vehicle-grid">
+            <div class="vehicle-card" id="vc-furgon" onclick="selectVehicle('furgon')">
+              <div class="vehicle-card-icon" id="vci-furgon" style="line-height:1"></div>
+              <div class="vehicle-card-label">Furgón</div>
+              <div class="vehicle-card-count" id="vc-furgon-count" style="display:none">0</div>
+            </div>
+            <div class="vehicle-card" id="vc-van" onclick="selectVehicle('van')">
+              <div class="vehicle-card-icon" id="vci-van" style="line-height:1"></div>
+              <div class="vehicle-card-label">Van</div>
+              <div class="vehicle-card-count" id="vc-van-count" style="display:none">0</div>
+            </div>
+            <div class="vehicle-card" id="vc-tt" onclick="selectVehicle('tt')">
+              <div class="vehicle-card-icon" id="vci-tt" style="line-height:1"></div>
+              <div class="vehicle-card-label">Todo Terreno</div>
+              <div class="vehicle-card-count" id="vc-tt-count" style="display:none">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-modal cantidad vehículos -->
+        <div id="vehicle-qty-panel" style="display:none;background:var(--bg-input);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:8px">
+          <div class="form-label" id="vehicle-qty-label">Cantidad de Furgones</div>
+          <div class="num-input">
+            <button class="num-btn" onclick="changeVehicleQty(-1)">−</button>
+            <input type="number" class="num-val" id="vehicle-qty-val" value="1" min="0" max="99">
+            <button class="num-btn" onclick="changeVehicleQty(1)">+</button>
+          </div>
+          <div class="form-group mt-8" id="nomenclatura-panel">
+            <div class="form-label">Nomenclatura de vehículos</div>
+            <div class="nomenclatura-list" id="nomenclatura-list"></div>
+          </div>
+          <button class="btn btn-primary mt-8" onclick="confirmVehicleQty()" style="flex:none;width:100%;margin-top:10px">Confirmar</button>
+        </div>
+
+        <div class="form-row mt-8">
+          <div class="form-group">
+            <div class="form-label">
+              <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+              Nº de agentes
+            </div>
+            <div class="num-input">
+              <button class="num-btn" onclick="changeNum('doe-agentes',-1)">−</button>
+              <input type="number" class="num-val" id="doe-agentes" value="0" min="0">
+              <button class="num-btn" onclick="changeNum('doe-agentes',1)">+</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-label">
+              <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+              Nº de mandos
+            </div>
+            <div class="num-input">
+              <button class="num-btn" onclick="changeNum('doe-mandos',-1)">−</button>
+              <input type="number" class="num-val" id="doe-mandos" value="0" min="0">
+              <button class="num-btn" onclick="changeNum('doe-mandos',1)">+</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rangos mandos -->
+        <div id="mandos-panel" style="display:none">
+          <div class="form-divider">Rangos de mandos</div>
+          <div class="rank-list">
+            <div class="rank-item">
+              <div class="rank-stripes"><div class="stripe silver"></div></div>
+              <div class="rank-name">Oficial</div>
+              <div class="num-input" style="width:100px">
+                <button class="num-btn" onclick="changeNum('rank-oficial',-1)">−</button>
+                <input type="number" class="num-val" id="rank-oficial" value="0" min="0">
+                <button class="num-btn" onclick="changeNum('rank-oficial',1)">+</button>
+              </div>
+            </div>
+            <div class="rank-item">
+              <div class="rank-stripes"><div class="stripe silver"></div><div class="stripe silver"></div></div>
+              <div class="rank-name">Subinspector</div>
+              <div class="num-input" style="width:100px">
+                <button class="num-btn" onclick="changeNum('rank-subinspector',-1)">−</button>
+                <input type="number" class="num-val" id="rank-subinspector" value="0" min="0">
+                <button class="num-btn" onclick="changeNum('rank-subinspector',1)">+</button>
+              </div>
+            </div>
+            <div class="rank-item">
+              <div class="rank-stripes"><div class="stripe silver"></div><div class="stripe silver"></div><div class="stripe silver"></div></div>
+              <div class="rank-name">Inspector</div>
+              <div class="num-input" style="width:100px">
+                <button class="num-btn" onclick="changeNum('rank-inspector',-1)">−</button>
+                <input type="number" class="num-val" id="rank-inspector" value="0" min="0">
+                <button class="num-btn" onclick="changeNum('rank-inspector',1)">+</button>
+              </div>
+            </div>
+            <div class="rank-item">
+              <div class="rank-stripes"><div class="stripe gold"></div></div>
+              <div class="rank-name">Comisario</div>
+              <div class="num-input" style="width:100px">
+                <button class="num-btn" onclick="changeNum('rank-comisario',-1)">−</button>
+                <input type="number" class="num-val" id="rank-comisario" value="0" min="0">
+                <button class="num-btn" onclick="changeNum('rank-comisario',1)">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: Señalización y armamento -->
+      <div class="step" id="step-2">
+        <div class="form-divider">Señalización</div>
+        <div class="signal-grid" id="signal-grid">
+          <!-- populated by JS -->
+        </div>
+
+        <div class="form-divider">Armamento y medios especiales</div>
+        <div class="weapon-grid">
+          <div class="weapon-card">
+            <div class="weapon-icon"><img id="rifle-icon-form" style="height:22px;object-fit:contain"></div>
+            <div class="weapon-label">Arma Larga</div>
+            <div class="num-input">
+              <button class="num-btn" onclick="changeNum('w-arma-larga',-1)">−</button>
+              <input type="number" class="num-val" id="w-arma-larga" value="0" min="0">
+              <button class="num-btn" onclick="changeNum('w-arma-larga',1)">+</button>
+            </div>
+          </div>
+          <div class="weapon-card">
+            <div class="weapon-icon">⚡</div>
+            <div class="weapon-label">DEC (Taser)</div>
+            <div class="num-input">
+              <button class="num-btn" onclick="changeNum('w-dec',-1)">−</button>
+              <input type="number" class="num-val" id="w-dec" value="0" min="0">
+              <button class="num-btn" onclick="changeNum('w-dec',1)">+</button>
+            </div>
+          </div>
+          <div class="weapon-card">
+            <div class="weapon-icon">🔺</div>
+            <div class="weapon-label">Barrera Pinchos</div>
+            <div class="num-input">
+              <button class="num-btn" onclick="changeNum('w-pinchos',-1)">−</button>
+              <input type="number" class="num-val" id="w-pinchos" value="0" min="0">
+              <button class="num-btn" onclick="changeNum('w-pinchos',1)">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-divider">Imagen del área (mapa)</div>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <button type="button" class="btn btn-secondary" onclick="openGoogleMapsCapture()" style="flex:1;padding:12px 10px;font-size:.78rem">
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Abrir Google Maps
+          </button>
+          <label style="flex:1;cursor:pointer">
+            <div class="btn btn-primary" style="padding:12px 10px;font-size:.78rem">
+              <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:white"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+              Adjuntar captura
+            </div>
+            <input type="file" id="map-upload" accept="image/*" style="display:none" onchange="handleMapUpload(event)">
+          </label>
+        </div>
+        <div id="map-preview-wrap" style="background:var(--bg-input);border:2px dashed var(--border);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:.75rem;color:var(--text-dim)">Sin captura adjunta</div>
+        </div>
+        <img id="map-preview-img" style="display:none;width:100%;border-radius:8px;margin-top:8px;max-height:200px;object-fit:cover">
+      </div>
+
+      <!-- STEP 3: Vista previa -->
+      <div class="step" id="step-3">
+        <div id="doe-preview"><!-- generado por JS --></div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="btn-prev" onclick="wizardPrev()" style="display:none">
+        <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+        Volver
+      </button>
+      <button class="btn btn-primary" id="btn-next" onclick="wizardNext()">
+        Continuar
+        <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- DOE DETAIL PAGE -->
+<div id="page-doe-detail">
+  <!-- Header -->
+  <div class="detail-header">
+    <button class="detail-back" onclick="closeDOEDetail()">
+      <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    </button>
+    <div class="detail-title">
+      <h2 id="detail-doe-title">—</h2>
+      <p id="detail-doe-meta">—</p>
+    </div>
+    <button class="btn-icon" onclick="exportDOEPDF()" title="Exportar PDF" style="flex-shrink:0">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+    </button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="detail-tabs">
+    <div class="detail-tab active" id="dtab-mapa" onclick="switchDetailTab('mapa')">🗺️ Edición</div>
+    <div class="detail-tab" id="dtab-resultados" onclick="switchDetailTab('resultados')">📊 Resultados</div>
+  </div>
+
+  <!-- TAB: MAPA EDITOR -->
+  <div class="detail-tab-content active" id="dtab-content-mapa">
+    <!-- Elements panel (collapsible) -->
+    <div class="elements-panel" id="elements-panel">
+      <div class="elements-panel-toggle" onclick="toggleElementsPanel()">
+        <div class="elements-panel-toggle-label">
+          <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+          Elementos del dispositivo
+        </div>
+        <svg class="elements-panel-toggle-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+      </div>
+      <div class="elements-panel-body" id="elements-panel-body">
+        <!-- Populated by JS based on DOE config -->
+      </div>
+    </div>
+
+    <!-- Canvas area -->
+    <div class="editor-wrap" id="editor-wrap">
+      <!-- No map placeholder -->
+      <div class="canvas-no-map" id="canvas-no-map">
+        <div style="font-size:3rem">🗺️</div>
+        <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.9rem;letter-spacing:1px;color:var(--text-secondary)">Sin imagen de mapa</div>
+        <div style="font-size:.75rem;color:var(--text-dim);text-align:center;line-height:1.5">Edita el DOE y adjunta<br>una captura de Google Maps</div>
+        <label style="cursor:pointer;margin-top:6px">
+          <span class="btn btn-primary" style="padding:10px 18px;font-size:.78rem">📎 Añadir mapa ahora</span>
+          <input type="file" accept="image/*" style="display:none" onchange="handleEditorMapUpload(event)">
+        </label>
+      </div>
+      <canvas id="editor-canvas"></canvas>
+      <!-- Finalized overlay -->
+      <div class="map-finalized" id="map-finalized">
+        <img id="map-finalized-img" class="map-finalized-img" alt="Mapa DOE finalizado">
+        <div class="map-finalized-actions">
+          <button class="btn btn-secondary" onclick="unfinalizeMap()" style="flex:1">
+            <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+            Editar
+          </button>
+          <button class="btn btn-primary" onclick="exportDOEPDF()" style="flex:1">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg>
+            PDF
+          </button>
+          <button class="btn" style="flex:1;background:var(--green);color:white;border:none" onclick="shareDOEPDF()">
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:white"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>
+            Enviar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating toolbar -->
+    <div class="editor-toolbar">
+      <div class="toolbar-row">
+        <span class="toolbar-label">Herramienta</span>
+        <div class="tool-btns">
+          <button class="tool-btn active" id="tool-select" onclick="setTool('select')">
+            <svg viewBox="0 0 24 24"><path d="M4 0l16 12.279-6.951 1.17 4.325 8.817-3.596 1.734-4.35-8.879-5.428 4.702z"/></svg>Mover
+          </button>
+          <button class="tool-btn" id="tool-arrow" onclick="setTool('arrow')">
+            <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>Flecha
+          </button>
+          <button class="tool-btn" id="tool-rect" onclick="setTool('rect')">
+            <svg viewBox="0 0 24 24"><path d="M3 5v14h18V5H3zm16 12H5V7h14v10z"/></svg>Cuadro
+          </button>
+          <button class="tool-btn" id="tool-circle" onclick="setTool('circle')">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/></svg>Círculo
+          </button>
+          <button class="tool-btn" id="tool-text" onclick="setTool('text')">
+            <svg viewBox="0 0 24 24"><path d="M5 4v3h5.5v12h3V7H19V4z"/></svg>Texto
+          </button>
+        </div>
+        <div class="toolbar-action-btns">
+          <button class="tbar-btn undo" onclick="editorUndo()">
+            <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>
+            Deshacer
+          </button>
+          <button class="tbar-btn clear" onclick="editorClear()">
+            <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            Limpiar
+          </button>
+          <button class="tbar-btn finish" onclick="finalizeMap()">
+            <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:white"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>Finalizar
+          </button>
+        </div>
+      </div>
+      <div class="toolbar-row">
+        <span class="toolbar-label">Color</span>
+        <div class="color-tools">
+          <div class="color-tool active" style="background:#ffffff" data-color="#ffffff" onclick="setToolColor(this)"></div>
+          <div class="color-tool" style="background:#1a6fc4" data-color="#1a6fc4" onclick="setToolColor(this)"></div>
+          <div class="color-tool" style="background:#e74c3c" data-color="#e74c3c" onclick="setToolColor(this)"></div>
+          <div class="color-tool" style="background:#f39c12" data-color="#f39c12" onclick="setToolColor(this)"></div>
+          <div class="color-tool" style="background:#27ae60" data-color="#27ae60" onclick="setToolColor(this)"></div>
+          <div class="color-tool" style="background:#c9a227" data-color="#c9a227" onclick="setToolColor(this)"></div>
+          <div class="color-tool" style="background:#e91e63" data-color="#e91e63" onclick="setToolColor(this)"></div>
+        </div>
+      </div>
+      <div class="toolbar-row">
+        <span class="toolbar-label">Zoom</span>
+        <div class="tool-btns">
+          <button class="tool-btn" onclick="editorZoom(1.3)" style="font-size:1.1rem;font-weight:900;padding:4px 14px">＋</button>
+          <button class="tool-btn" onclick="editorZoom(0.77)" style="font-size:1.1rem;font-weight:900;padding:4px 14px">－</button>
+          <button class="tool-btn" onclick="editorZoomReset()" style="font-size:.7rem">1:1</button>
+        </div>
+        <div style="margin-left:auto;font-size:.6rem;color:var(--text-dim);font-family:'Rajdhani',sans-serif">
+          Toca→mover<br>2×→borrar
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: RESULTADOS -->
+  <div class="detail-tab-content" id="dtab-content-resultados">
+    <div class="resultados-scroll">
+      <div class="page-inner">
+        <div class="section-title" style="margin-bottom:12px">Resultados del dispositivo</div>
+        <div class="resultado-grid" id="resultados-grid">
+          <!-- Populated by JS -->
+        </div>
+        <div class="form-group mt-8">
+          <div class="form-label">📝 Otra actuación relevante</div>
+          <textarea class="form-input" id="resultado-otra" rows="3" placeholder="Describe cualquier otra actuación destacada del dispositivo..."></textarea>
+        </div>
+        <div style="height:20px"></div>
+      </div>
+    </div>
+    <div class="pdf-actions">
+      <button class="btn btn-primary" onclick="saveResultados()">
+        <svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+        Guardar resultados
+      </button>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-secondary" style="flex:1" onclick="exportDOEPDF()">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg>
+          PDF
+        </button>
+        <button class="btn" style="flex:1;background:var(--green);color:white;border:none" onclick="shareDOEPDF()">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:white"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>
+          Enviar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="confirm-modal" id="confirm-modal">
+  <div class="confirm-box">
+    <div class="confirm-icon" id="confirm-icon">⚠️</div>
+    <div class="confirm-title" id="confirm-title">¿Confirmar acción?</div>
+    <div class="confirm-text" id="confirm-text">Esta acción no se puede deshacer.</div>
+    <div class="confirm-actions">
+      <button class="btn btn-secondary" onclick="closeConfirm()">Cancelar</button>
+      <button class="btn btn-danger" id="confirm-ok-btn" onclick="confirmAction()">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span class="toast-icon">✅</span><span id="toast-msg">Guardado</span></div>
+
+<!-- CDN: Chart.js + jsPDF -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+<script>
+/* ========== DATA ========== */
+var DB_KEY = 'does_v1';
+var SETTINGS_KEY = 'does_settings_v1';
+
+var signalItems = [
+  {id:'conos',icon:'🔸',name:'Conos', mapSvg:'cone'},
+  {id:'baliza',icon:'🚨',name:'Baliza luminosa', mapSvg:'baliza'},
+  {id:'baden',icon:'〰️',name:'Badén', mapSvg:'text'},
+  {id:'vallas',icon:'🚧',name:'Vallas', mapSvg:'text'},
+  {id:'new-jersey',icon:'🟦',name:'New Jersey', mapSvg:'text'},
+  {id:'bolardos',icon:'⬤',name:'Bolardos', mapSvg:'text'},
+  {id:'señal-vertical',icon:'🔺',name:'Señal vertical', mapSvg:'text'},
+  {id:'cinta',icon:'CINTA',name:'Cinta balizamiento', mapSvg:'cinta'},
+  {id:'señal-luminosa',icon:'💡',name:'Señalización luminosa', mapSvg:'text'},
+  {id:'otra',icon:'⚠️',name:'Otra señalización', mapSvg:null, noMap:true},
+];
+
+var STATS_KEYS = [
+  {id:'vehiculos_controlados', label:'Vehículos controlados', color:'#1a6fc4'},
+  {id:'personas_controladas', label:'Personas controladas', color:'#0e9de0'},
+  {id:'detenidos', label:'Detenidos', color:'#c0392b'},
+  {id:'actas_drogas', label:'Actas de drogas', color:'#9333ea'},
+  {id:'actas_armas', label:'Actas de armas', color:'#dc2626'},
+  {id:'actas_intervencion', label:'Actas de intervención', color:'#d97706'},
+  {id:'imputados', label:'Imputados', color:'#be185d'},
+  {id:'vehiculos_grua', label:'Vehículos retirados grúa', color:'#0891b2'},
+  {id:'denuncias_trafico', label:'Denuncias de tráfico', color:'#16a34a'},
+  {id:'denuncias_ordenanza', label:'Denuncias Ord. Municipal', color:'#65a30d'},
+  {id:'identificados_comisaria', label:'Identificados en comisaría', color:'#ca8a04'},
+];
+
+function loadDB(){try{return JSON.parse(localStorage.getItem(DB_KEY))||[]}catch(e){return[]}}
+function saveDB(data){localStorage.setItem(DB_KEY,JSON.stringify(data))}
+function loadSettings(){try{return JSON.parse(localStorage.getItem(SETTINGS_KEY))||{}}catch(e){return{}}}
+function saveSettings(s){localStorage.setItem(SETTINGS_KEY,JSON.stringify(s))}
+
+/* ========== NAVIGATION ========== */
+var currentPage = 'home';
+function navTo(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  var nav = document.getElementById('nav-'+page);
+  if(nav) nav.classList.add('active');
+  currentPage = page;
+  if(page==='stats'){
+    renderDatePicker('hoy');
+    renderStats();
+    document.querySelectorAll('.stats-filter').forEach(function(b){b.classList.remove('active')});
+    var sf=document.getElementById('sf-hoy');
+    if(sf) sf.classList.add('active');
+    currentStatsFilter='hoy'; statsCustomDate=null;
+  }
+  if(page==='settings') loadSettingsUI();
+}
+
+/* ========== TOAST ========== */
+function showToast(msg, icon){
+  icon = icon || '✅';
+  var t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.querySelector('.toast-icon').textContent = icon;
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show')},2500);
+}
+
+/* ========== DOE LIST ========== */
+function renderDOEList(){
+  var list = document.getElementById('doe-list');
+  var data = loadDB();
+  if(!data.length){
+    list.innerHTML = '<div class="doe-empty"><div class="doe-empty-icon"><svg viewBox="0 0 24 24"><path d="M20 6h-2.18c.07-.44.18-.88.18-1.3 0-2.59-2.09-4.7-4.68-4.7C11.84 0 10.38.68 9.35 1.9L8 3.4 6.65 1.9C5.62.68 4.16 0 2.68 0 1.09 0 0 1.2 0 2.7c0 .42.09.86.18 1.3H0v14c0 1.1.9 2 2 2h20c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 14H2V8h18v12z"/></svg></div><h3>Sin DOEs registrados</h3><p>Pulsa "Añadir DOE" para crear<br>tu primer dispositivo operativo</p></div>';
+    return;
+  }
+  list.innerHTML = data.map(function(doe,i){
+    var vTotal = (doe.vehiculos||[]).reduce(function(a,b){return a+(b.qty||0)},0);
+    var status = doe.finalizado ? 'finalizado' : 'borrador';
+    var statusLabel = doe.finalizado ? 'Finalizado' : 'Borrador';
+    return '<div class="doe-card" onclick="openDOE('+i+')">\
+      <div class="doe-card-stripe"></div>\
+      <div class="doe-card-inner">\
+        <div class="doe-card-badge">'+formatDateBadge(doe.fecha)+'</div>\
+        <div class="doe-card-info">\
+          <div class="doe-card-title">'+(doe.lugar||'Sin ubicación')+'</div>\
+          <div class="doe-card-meta">\
+            <div class="doe-meta-chip"><svg viewBox="0 0 24 24"><path d="M17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99z"/></svg>'+vTotal+' veh.</div>\
+            <div class="doe-meta-chip"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>'+(doe.agentes||0)+' agentes</div>\
+          </div>\
+        </div>\
+        <div class="doe-card-status '+status+'">'+statusLabel+'</div>\
+      </div>\
+      <div class="doe-card-actions">\
+        <button class="doe-action-btn edit" onclick="event.stopPropagation();editDOE('+i+')">\
+          <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>\
+          Editar\
+        </button>\
+        <button class="doe-action-btn view" onclick="event.stopPropagation();openDOE('+i+')">\
+          <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>\
+          Ver\
+        </button>\
+        <button class="doe-action-btn del" onclick="event.stopPropagation();confirmDeleteDOE('+i+')">\
+          <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>\
+          Borrar\
+        </button>\
+      </div>\
+    </div>';
+  }).join('');
+}
+
+function formatDateBadge(fecha){
+  if(!fecha) return '??';
+  var d = new Date(fecha+'T12:00:00');
+  return d.getDate()+'<br><span style="font-size:.55rem">'+['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'][d.getMonth()]+'</span>';
+}
+
+/* ========== WIZARD ========== */
+var wizardStep = 1;
+var editingIndex = -1;
+var currentDOE = {};
+var selectedVehicleType = null;
+
+function openWizard(){
+  editingIndex = -1;
+  currentDOE = {
+    fecha: new Date().toISOString().split('T')[0],
+    lugar: '',
+    indicativos: [],
+    vehiculos: [],
+    agentes: 0,
+    mandos: 0,
+    mandos_rangos: {oficial:0,subinspector:0,inspector:0,comisario:0},
+    señalizacion: {},
+    armamento: {arma_larga:0,dec:0,pinchos:0},
+    mapa: null,
+    resultados: {},
+    finalizado: false,
+  };
+  wizardStep = 1;
+  renderWizardStep();
+  document.getElementById('wizard-overlay').classList.add('active');
+  document.getElementById('doe-fecha').value = currentDOE.fecha;
+}
+
+function editDOE(idx){
+  var data = loadDB();
+  editingIndex = idx;
+  currentDOE = JSON.parse(JSON.stringify(data[idx]));
+  wizardStep = 1;
+  renderWizardStep();
+  populateStep1();
+  document.getElementById('wizard-overlay').classList.add('active');
+}
+
+function closeWizard(){
+  document.getElementById('wizard-overlay').classList.remove('active');
+}
+
+var wizardTitles = ['Datos del dispositivo','Señalización y medios','Resumen y guardar'];
+var wizardProgresses = ['33%','66%','100%'];
+
+function renderWizardStep(){
+  document.querySelectorAll('.step').forEach(function(s){s.classList.remove('active')});
+  document.getElementById('step-'+wizardStep).classList.add('active');
+  document.getElementById('wizard-step-badge').textContent = wizardStep;
+  document.getElementById('wizard-step-title').textContent = wizardTitles[wizardStep-1];
+  document.getElementById('wizard-progress').style.width = wizardProgresses[wizardStep-1];
+  document.getElementById('btn-prev').style.display = wizardStep>1?'flex':'none';
+  document.getElementById('btn-next').innerHTML = wizardStep<3
+    ? 'Continuar<svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>'
+    : '<svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>Guardar DOE';
+  if(wizardStep===2) renderSignalGrid();
+  if(wizardStep===3) renderPreview();
+}
+
+function wizardNext(){
+  if(wizardStep===1){
+    var fecha = document.getElementById('doe-fecha').value;
+    var lugar = document.getElementById('doe-lugar').value.trim();
+    if(!lugar){showToast('Introduce el lugar del dispositivo','⚠️');return;}
+    currentDOE.fecha = fecha;
+    currentDOE.lugar = lugar;
+    currentDOE.agentes = parseInt(document.getElementById('doe-agentes').value)||0;
+    currentDOE.mandos = parseInt(document.getElementById('doe-mandos').value)||0;
+    currentDOE.mandos_rangos = {
+      oficial: parseInt(document.getElementById('rank-oficial').value)||0,
+      subinspector: parseInt(document.getElementById('rank-subinspector').value)||0,
+      inspector: parseInt(document.getElementById('rank-inspector').value)||0,
+      comisario: parseInt(document.getElementById('rank-comisario').value)||0,
+    };
+    wizardStep=2;
+  } else if(wizardStep===2){
+    var sig = {};
+    signalItems.forEach(function(s){
+      var v = parseInt(document.getElementById('sig-val-'+s.id)?.textContent)||0;
+      if(v>0) sig[s.id] = v;
+    });
+    // Save 'otra' description
+    var otraDesc = document.getElementById('sig-otra-desc');
+    if(otraDesc && otraDesc.value.trim()) sig['otra_desc'] = otraDesc.value.trim();
+    currentDOE.señalizacion = sig;
+    currentDOE.armamento = {
+      arma_larga: parseInt(document.getElementById('w-arma-larga').value)||0,
+      dec: parseInt(document.getElementById('w-dec').value)||0,
+      pinchos: parseInt(document.getElementById('w-pinchos').value)||0,
+    };
+    wizardStep=3;
+  } else if(wizardStep===3){
+    saveDOE();
+    return;
+  }
+  renderWizardStep();
+}
+
+function wizardPrev(){
+  if(wizardStep>1){wizardStep--;renderWizardStep();}
+}
+
+function populateStep1(){
+  document.getElementById('doe-fecha').value = currentDOE.fecha||'';
+  document.getElementById('doe-lugar').value = currentDOE.lugar||'';
+  document.getElementById('doe-agentes').value = currentDOE.agentes||0;
+  document.getElementById('doe-mandos').value = currentDOE.mandos||0;
+  renderIndicativos();
+  updateMandosPanel();
+  var linkPreview = document.getElementById('location-link-preview');
+  if(linkPreview) linkPreview.style.display = currentDOE.lugarLink ? 'block' : 'none';
+}
+
+/* ========== INDICATIVOS ========== */
+function addIndicativo(){
+  var inp = document.getElementById('indicativo-input');
+  var val = inp.value.trim().toUpperCase();
+  if(!val) return;
+  if(!currentDOE.indicativos) currentDOE.indicativos = [];
+  currentDOE.indicativos.push(val);
+  inp.value='';
+  renderIndicativos();
+}
+document.getElementById('indicativo-input').addEventListener('keydown',function(e){
+  if(e.key==='Enter'){e.preventDefault();addIndicativo();}
+});
+function removeIndicativo(i){
+  currentDOE.indicativos.splice(i,1);
+  renderIndicativos();
+}
+function renderIndicativos(){
+  var tags = document.getElementById('indicativo-tags');
+  tags.innerHTML = (currentDOE.indicativos||[]).map(function(t,i){
+    return '<span class="indicativo-tag">'+t+'<span class="indicativo-tag-remove" onclick="removeIndicativo('+i+')">×</span></span>';
+  }).join('');
+}
+
+/* ========== VEHICLE ========== */
+function selectVehicle(type){
+  selectedVehicleType = type;
+  var labels = {furgon:'Furgones',van:'Vans',tt:'Todo Terrenos'};
+  document.getElementById('vehicle-qty-label').textContent = 'Cantidad de '+labels[type];
+  var existing = (currentDOE.vehiculos||[]).find(function(v){return v.type===type});
+  var qty = existing ? existing.qty : 1;
+  document.getElementById('vehicle-qty-val').value = qty;
+  document.getElementById('vehicle-qty-panel').style.display='block';
+  renderNomenclaturaInputs(type, qty, existing ? existing.nombres : []);
+}
+
+function changeVehicleQty(d){
+  var inp = document.getElementById('vehicle-qty-val');
+  var v = Math.max(0,parseInt(inp.value||0)+d);
+  inp.value=v;
+  renderNomenclaturaInputs(selectedVehicleType, v, []);
+}
+
+function renderNomenclaturaInputs(type, qty, existing){
+  var icons = {furgon:'🚐',van:'🚙',tt:'🛻'};
+  var list = document.getElementById('nomenclatura-list');
+  list.innerHTML = '';
+  for(var i=0;i<qty;i++){
+    var val = existing && existing[i] ? existing[i] : '';
+    list.innerHTML += '<div class="nomenclatura-item"><span class="nomenclatura-item-icon">'+icons[type]+'</span><span class="nomenclatura-item-label">Veh. '+(i+1)+'</span><input class="form-input" placeholder="Nombre/matrícula" value="'+val+'" id="nom-'+type+'-'+i+'"></div>';
+  }
+}
+
+function confirmVehicleQty(){
+  var type = selectedVehicleType;
+  var qty = parseInt(document.getElementById('vehicle-qty-val').value)||0;
+  var nombres = [];
+  for(var i=0;i<qty;i++){
+    var inp = document.getElementById('nom-'+type+'-'+i);
+    nombres.push(inp ? inp.value.trim() : '');
+  }
+  if(!currentDOE.vehiculos) currentDOE.vehiculos = [];
+  var idx = currentDOE.vehiculos.findIndex(function(v){return v.type===type});
+  if(qty===0){
+    if(idx>=0) currentDOE.vehiculos.splice(idx,1);
+  } else {
+    var obj = {type:type, qty:qty, nombres:nombres};
+    if(idx>=0) currentDOE.vehiculos[idx]=obj;
+    else currentDOE.vehiculos.push(obj);
+  }
+  var countEl = document.getElementById('vc-'+type+'-count');
+  if(qty>0){
+    document.getElementById('vc-'+type).classList.add('selected');
+    countEl.textContent=qty; countEl.style.display='flex';
+  } else {
+    document.getElementById('vc-'+type).classList.remove('selected');
+    countEl.style.display='none';
+  }
+  document.getElementById('vehicle-qty-panel').style.display='none';
+}
+
+/* ========== MANDOS ========== */
+document.getElementById('doe-mandos').addEventListener('input',updateMandosPanel);
+function updateMandosPanel(){
+  var v = parseInt(document.getElementById('doe-mandos').value)||0;
+  document.getElementById('mandos-panel').style.display = v>0?'block':'none';
+}
+
+/* ========== NUM INPUT ========== */
+function changeNum(id, d){
+  var el = document.getElementById(id);
+  var v = Math.max(0,(parseInt(el.value)||0)+d);
+  el.value=v;
+  if(id==='doe-mandos') updateMandosPanel();
+}
+
+/* ========== SIGNAL GRID ========== */
+function renderSignalGrid(){
+  var grid = document.getElementById('signal-grid');
+  grid.innerHTML = signalItems.map(function(s){
+    var current = (currentDOE.señalizacion && currentDOE.señalizacion[s.id])||0;
+    var iconHtml = s.id==='cinta'
+      ? '<div style="width:30px;height:13px;border-radius:3px;background:repeating-linear-gradient(90deg,#1565c0 0,#1565c0 6px,#fff 6px,#fff 12px);border:1px solid #555;flex-shrink:0"></div>'
+      : '<span style="font-size:1.1rem;line-height:1">'+s.icon+'</span>';
+    var extraRow = (s.id==='otra')
+      ? '<div style="display:'+(current>0?'block':'none')+';margin-top:4px;padding:0 2px" id="sig-otra-wrap"><input class="form-input" id="sig-otra-desc" placeholder="Describe el tipo de señal..." style="font-size:.78rem;padding:6px 8px" value="'+(currentDOE.señalizacion&&currentDOE.señalizacion.otra_desc||'')+'"></div>'
+      : '';
+    return '<div style="grid-column:1/-1"><div class="signal-item'+(current>0?' active':'')+'"><div class="signal-item-icon">'+iconHtml+'</div><div class="signal-item-info"><div class="signal-item-name">'+s.name+'</div></div><div class="signal-item-count"><button class="signal-count-btn" onclick="changeSig(\''+s.id+'\',-1)">−</button><div class="signal-count-val" id="sig-val-'+s.id+'">'+current+'</div><button class="signal-count-btn" onclick="changeSig(\''+s.id+'\',1)">+</button></div></div>'+extraRow+'</div>';
+  }).join('');
+}
+
+function changeSig(id, d){
+  var el = document.getElementById('sig-val-'+id);
+  if(!el) return;
+  var v = Math.max(0,(parseInt(el.textContent)||0)+d);
+  el.textContent = v;
+  el.closest('.signal-item').classList.toggle('active',v>0);
+  if(id==='otra'){
+    var wrap = document.getElementById('sig-otra-wrap');
+    if(wrap) wrap.style.display = v>0?'block':'none';
+  }
+}
+
+/* ========== MAP UPLOAD ========== */
+function handleMapUpload(e){
+  var file = e.target.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    currentDOE.mapa = ev.target.result;
+    var img = document.getElementById('map-preview-img');
+    img.src = ev.target.result;
+    img.style.display='block';
+    document.getElementById('map-preview-wrap').style.display='none';
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ========== PREVIEW ========== */
+function renderPreview(){
+  var d = currentDOE;
+  var vTotal = (d.vehiculos||[]).reduce(function(a,b){return a+(b.qty||0)},0);
+  var vList = (d.vehiculos||[]).map(function(v){
+    var icons={furgon:'🚐',van:'🚙',tt:'🛻'};
+    return icons[v.type]+' '+v.qty+' '+({furgon:'Furgón',van:'Van',tt:'Todo Terreno'}[v.type])+(v.nombres.filter(Boolean).length?' ('+v.nombres.filter(Boolean).join(', ')+')':'');
+  }).join('<br>');
+  var sigList = Object.entries(d.señalizacion||{}).map(function(e){
+    var s = signalItems.find(function(si){return si.id===e[0]});
+    return s ? s.icon+' '+s.name+': '+e[1] : '';
+  }).filter(Boolean).join('<br>');
+  var arm = d.armamento||{};
+  var armList = [
+    arm.arma_larga>0 ? '🔫 Arma larga: '+arm.arma_larga : '',
+    arm.dec>0 ? '⚡ DEC: '+arm.dec : '',
+    arm.pinchos>0 ? '🔺 Barrera pinchos: '+arm.pinchos : '',
+  ].filter(Boolean).join('<br>');
+
+  document.getElementById('doe-preview').innerHTML = '<div style="background:var(--bg-input);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">\
+    <div style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:1.1rem;letter-spacing:1px;color:var(--text-primary);margin-bottom:10px">📋 Resumen del DOE</div>\
+    <div style="font-size:.82rem;color:var(--text-secondary);line-height:2">\
+      <b style="color:var(--text-dim)">📅 Fecha:</b> '+(d.fecha||'—')+'<br>\
+      <b style="color:var(--text-dim)">📍 Lugar:</b> '+(d.lugar||'—')+'<br>\
+      <b style="color:var(--text-dim)">📻 Indicativos:</b> '+((d.indicativos||[]).join(', ')||'—')+'<br>\
+      <b style="color:var(--text-dim)">🚗 Vehículos:</b> '+vTotal+' unidades<br>'+vList+'<br>\
+      <b style="color:var(--text-dim)">👮 Agentes:</b> '+(d.agentes||0)+'<br>\
+      <b style="color:var(--text-dim)">⭐ Mandos:</b> '+(d.mandos||0)+'<br>\
+    </div>\
+  </div>'
+  +(sigList ? '<div style="background:var(--bg-input);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;font-size:.82rem;color:var(--text-secondary);line-height:1.8"><b style="color:var(--text-dim)">🚦 Señalización:</b><br>'+sigList+'</div>' : '')
+  +(armList ? '<div style="background:var(--bg-input);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;font-size:.82rem;color:var(--text-secondary);line-height:1.8"><b style="color:var(--text-dim)">⚔️ Medios especiales:</b><br>'+armList+'</div>' : '')
+  +(d.mapa ? '<img src="'+d.mapa+'" style="width:100%;border-radius:8px;border:1px solid var(--border)">' : '');
+}
+
+/* ========== SAVE DOE ========== */
+function saveDOE(){
+  var data = loadDB();
+  if(editingIndex>=0){
+    data[editingIndex] = currentDOE;
+  } else {
+    currentDOE.id = Date.now();
+    data.unshift(currentDOE);
+  }
+  saveDB(data);
+  closeWizard();
+  renderDOEList();
+  showToast(editingIndex>=0?'DOE actualizado':'DOE guardado correctamente','✅');
+}
+
+/* ========== DOE DETAIL ========== */
+var detailIndex = -1;
+var fabricCanvas = null;
+var editorTool = 'select';
+var editorColor = '#ffffff';
+var isDrawingShape = false;
+var drawStartX = 0, drawStartY = 0;
+var activeShape = null;
+var canvasHistory = [];
+var canvasHistoryIdx = -1;
+
+var RESULTADO_FIELDS = [
+  {id:'vehiculos_controlados', label:'Vehículos controlados', icon:'🚗'},
+  {id:'personas_controladas', label:'Personas controladas', icon:'👤'},
+  {id:'detenidos', label:'Detenidos', icon:'🔒'},
+  {id:'actas_drogas', label:'Actas de drogas', icon:'💊'},
+  {id:'actas_armas', label:'Actas de armas', icon:'🔫'},
+  {id:'actas_intervencion', label:'Actas de intervención', icon:'📋'},
+  {id:'imputados', label:'Imputados', icon:'⚖️'},
+  {id:'vehiculos_grua', label:'Retirados con grúa', icon:'🚛'},
+  {id:'denuncias_trafico', label:'Denuncias tráfico', icon:'🛑'},
+  {id:'denuncias_ordenanza', label:'Denuncias Ord. Municipal', icon:'📜'},
+  {id:'identificados_comisaria', label:'Identificados comisaría', icon:'🏛️'},
+];
+
+function openDOE(idx){
+  var data = loadDB();
+  detailIndex = idx;
+  var d = data[idx];
+  document.getElementById('detail-doe-title').textContent = d.lugar || 'Sin ubicación';
+  document.getElementById('detail-doe-meta').textContent = (d.fecha||'') + ' · ' + ((d.indicativos||[]).join(', ')||'Sin indicativo');
+  switchDetailTab('mapa');
+  buildElementsPanel(d);
+  buildResultadosGrid(d);
+  document.getElementById('page-doe-detail').classList.add('active');
+  setTimeout(function(){ initFabricCanvas(d); }, 100);
+}
+
+function closeDOEDetail(){
+  document.getElementById('page-doe-detail').classList.remove('active');
+  if(fabricCanvas){ fabricCanvas.dispose(); fabricCanvas=null; }
+  detailIndex=-1;
+}
+
+function switchDetailTab(tab){
+  document.querySelectorAll('.detail-tab').forEach(function(t){t.classList.remove('active')});
+  document.querySelectorAll('.detail-tab-content').forEach(function(t){t.classList.remove('active')});
+  document.getElementById('dtab-'+tab).classList.add('active');
+  document.getElementById('dtab-content-'+tab).classList.add('active');
+}
+
+/* ========== VEHICLE SVGs TOP-DOWN ========== */
+function getVehicleSVGDataURL(type, abbrev){
+  abbrev = (abbrev||'').substring(0,3);
+  var fs = abbrev.length<=1?16:abbrev.length===2?12:10;
+  var w, h, svgBody;
+  if(type==='furgon'){
+    w=52; h=92;
+    svgBody='<rect x="4" y="2" width="44" height="88" rx="9" fill="#0d2a5a"/>'
+      +'<rect x="4" y="2" width="44" height="88" rx="9" fill="url(#metallic)" opacity="0.15"/>'
+      +'<rect x="9" y="7" width="34" height="22" rx="4" fill="#1a4a9a" opacity="0.8"/>'
+      +'<rect x="10" y="63" width="32" height="18" rx="3" fill="#1a4a9a" opacity="0.65"/>'
+      +'<rect x="4" y="40" width="44" height="3" fill="#4477cc" opacity="0.5"/>'
+      +'<rect x="4" y="47" width="44" height="3" fill="#4477cc" opacity="0.5"/>'
+      +'<rect x="0" y="12" width="8" height="16" rx="2" fill="#0a0a1a"/>'
+      +'<rect x="44" y="12" width="8" height="16" rx="2" fill="#0a0a1a"/>'
+      +'<rect x="0" y="64" width="8" height="16" rx="2" fill="#0a0a1a"/>'
+      +'<rect x="44" y="64" width="8" height="16" rx="2" fill="#0a0a1a"/>'
+      +(abbrev?'<text x="26" y="48" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-weight="bold" font-size="16" fill="white">'+abbrev+'</text>':'');
+  } else if(type==='van'){
+    w=48; h=76;
+    svgBody='<rect x="4" y="2" width="40" height="72" rx="10" fill="#0d2a5a"/>'
+      +'<rect x="4" y="2" width="40" height="72" rx="10" fill="url(#metallic)" opacity="0.15"/>'
+      +'<rect x="9" y="7" width="30" height="18" rx="4" fill="#1a4a9a" opacity="0.8"/>'
+      +'<rect x="10" y="50" width="28" height="16" rx="3" fill="#1a4a9a" opacity="0.65"/>'
+      +'<rect x="4" y="33" width="40" height="3" fill="#4477cc" opacity="0.5"/>'
+      +'<rect x="4" y="39" width="40" height="3" fill="#4477cc" opacity="0.5"/>'
+      +'<rect x="0" y="10" width="8" height="14" rx="2" fill="#0a0a1a"/>'
+      +'<rect x="40" y="10" width="8" height="14" rx="2" fill="#0a0a1a"/>'
+      +'<rect x="0" y="52" width="8" height="14" rx="2" fill="#0a0a1a"/>'
+      +'<rect x="40" y="52" width="8" height="14" rx="2" fill="#0a0a1a"/>'
+      +(abbrev?'<text x="24" y="37" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-weight="bold" font-size="15" fill="white">'+abbrev+'</text>':'');
+  } else { // todo terreno
+    w=52; h=80;
+    svgBody='<rect x="3" y="2" width="46" height="76" rx="8" fill="#0d2a5a"/>'
+      +'<rect x="3" y="2" width="46" height="76" rx="8" fill="url(#metallic)" opacity="0.15"/>'
+      +'<rect x="9" y="7" width="34" height="20" rx="3" fill="#1a4a9a" opacity="0.8"/>'
+      +'<rect x="10" y="54" width="32" height="16" rx="3" fill="#1a4a9a" opacity="0.65"/>'
+      +'<rect x="3" y="35" width="46" height="3" fill="#4477cc" opacity="0.5"/>'
+      +'<rect x="3" y="41" width="46" height="3" fill="#4477cc" opacity="0.5"/>'
+      +'<rect x="0" y="11" width="8" height="16" rx="2" fill="#0a0a1a"/><rect x="2" y="14" width="4" height="10" rx="1" fill="#222"/>'
+      +'<rect x="44" y="11" width="8" height="16" rx="2" fill="#0a0a1a"/><rect x="46" y="14" width="4" height="10" rx="1" fill="#222"/>'
+      +'<rect x="0" y="53" width="8" height="16" rx="2" fill="#0a0a1a"/><rect x="2" y="56" width="4" height="10" rx="1" fill="#222"/>'
+      +'<rect x="44" y="53" width="8" height="16" rx="2" fill="#0a0a1a"/><rect x="46" y="56" width="4" height="10" rx="1" fill="#222"/>'
+      +(abbrev?'<text x="26" y="39" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-weight="bold" font-size="15" fill="white">'+abbrev+'</text>':'');
+  }
+  var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+w+' '+h+'" width="'+w+'" height="'+h+'">'
+    +'<defs><linearGradient id="metallic" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0.2"/><stop offset="0.5" stop-color="#fff" stop-opacity="0.05"/><stop offset="1" stop-color="#000" stop-opacity="0.1"/></linearGradient></defs>'
+    +svgBody+'</svg>';
+  return 'data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(svg)));
+}
+
+function getConeSVGDataURL(){
+  var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 36" width="32" height="36">'
+    +'<ellipse cx="16" cy="34" rx="14" ry="2" fill="rgba(0,0,0,0.3)"/>'
+    +'<polygon points="16,2 4,34 28,34" fill="#e65100"/>'
+    +'<polygon points="16,2 4,34 28,34" fill="url(#cg)"/>'
+    +'<rect x="6" y="20" width="20" height="4" fill="white" opacity="0.7"/>'
+    +'<defs><linearGradient id="cg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0.2"/><stop offset="1" stop-color="#000" stop-opacity="0.15"/></linearGradient></defs>'
+    +'</svg>';
+  return 'data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(svg)));
+}
+
+function getCintaSVGDataURL(){
+  var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 16" width="60" height="16">'
+    +'<rect width="60" height="16" fill="white" rx="2"/>'
+    +'<rect width="60" height="16" fill="url(#cp)" rx="2"/>'
+    +'<rect width="60" height="16" fill="none" stroke="#1565c0" stroke-width="1" rx="2"/>'
+    +'<defs><pattern id="cp" width="12" height="16" patternUnits="userSpaceOnUse">'
+    +'<rect width="6" height="16" fill="#1565c0"/></pattern></defs>'
+    +'</svg>';
+  return 'data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(svg)));
+}
+
+function getRifleSVGDataURL(){
+  var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 22" width="64" height="22">'
+    +'<rect x="2" y="9" width="50" height="4" rx="2" fill="#1a1a1a"/>'
+    +'<rect x="48" y="7" width="14" height="8" rx="1" fill="#111"/>'
+    +'<rect x="10" y="13" width="18" height="7" rx="2" fill="#222"/>'
+    +'<rect x="4" y="7" width="8" height="2" rx="1" fill="#333"/>'
+    +'<circle cx="58" cy="11" r="2" fill="#0a0a0a"/>'
+    +'<rect x="20" y="8" width="2" height="6" rx="1" fill="#444"/>'
+    +'</svg>';
+  return 'data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(svg)));
+}
+
+function getMandoStripesSVGDataURL(rank){
+  var stripes = {oficial:1,subinspector:2,inspector:3,comisario:1};
+  var gold = rank==='comisario';
+  var count = stripes[rank]||1;
+  var w = count*10+4;
+  var bars = '';
+  for(var i=0;i<count;i++){
+    bars+='<rect x="'+(2+i*10)+'" y="2" width="6" height="18" rx="1" fill="'+(gold?'url(#gg)':'url(#sg)')+'"/>';
+  }
+  var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+w+' 22" width="'+w+'" height="22">'
+    +'<defs>'
+    +'<linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8eef8"/><stop offset="1" stop-color="#9aaabb"/></linearGradient>'
+    +'<linearGradient id="gg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe066"/><stop offset="1" stop-color="#b8860b"/></linearGradient>'
+    +'</defs>'+bars+'</svg>';
+  return 'data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(svg)));
+}
+
+/* Inject vehicle SVGs into wizard cards on init */
+function injectVehicleCardSVGs(){
+  ['furgon','van','tt'].forEach(function(t){
+    var el = document.getElementById('vci-'+t);
+    if(el) el.innerHTML='<img src="'+getVehicleSVGDataURL(t,'')+ '" style="height:44px;object-fit:contain">';
+  });
+  var ri=document.getElementById('rifle-icon-form');if(ri)ri.src=getRifleSVGDataURL();
+}
+
+/* ===== ELEMENTS PANEL (FASE 3 REWRITE) ===== */
+function buildElementsPanel(d){
+  var body = document.getElementById('elements-panel-body');
+  body.innerHTML = '';
+  var groups = [];
+  var arm = d.armamento||{};
+
+  // DEC — solo símbolo ⚡, sin nombre debajo
+  if((arm.dec||0)>0){
+    var decChips = [];
+    for(var i=0;i<arm.dec;i++){
+      decChips.push('<div class="elem-chip" onclick="addDecToCanvas()"><div style="font-size:1.3rem;line-height:1">⚡</div></div>');
+    }
+    groups.push({title:'DEC', chips:decChips});
+  }
+
+  // Arma larga — icono fusil SVG negro
+  if((arm.arma_larga||0)>0){
+    var rifleChips = [];
+    for(var i=0;i<arm.arma_larga;i++){
+      rifleChips.push('<div class="elem-chip" onclick="addRifleToCanvas()"><img src="'+getRifleSVGDataURL()+'" style="height:22px;object-fit:contain"></div>');
+    }
+    groups.push({title:'Arma larga', chips:rifleChips});
+  }
+
+  // Mandos — solo rayas, sin nombre
+  var rangos = d.mandos_rangos||{};
+  var mandoChips = [];
+  ['oficial','subinspector','inspector','comisario'].forEach(function(rank){
+    var cnt = rangos[rank]||0;
+    for(var i=0;i<cnt;i++){
+      mandoChips.push('<div class="elem-chip" onclick="addMandoToCanvas(\''+rank+'\')"><img src="'+getMandoStripesSVGDataURL(rank)+'" style="height:22px;object-fit:contain"></div>');
+    }
+  });
+  if(mandoChips.length) groups.push({title:'Mandos', chips:mandoChips});
+
+  // Vehículos — SVG policial con inicial del nombre
+  var vehChips = [];
+  (d.vehiculos||[]).forEach(function(v){
+    for(var i=0;i<v.qty;i++){
+      var nom = (v.nombres&&v.nombres[i]) ? v.nombres[i] : '';
+      var abbrev = nom ? nom.trim().substring(0,2).toUpperCase() : '';
+      var svgUrl = getVehicleSVGDataURL(v.type, abbrev);
+      var nomLabel = nom.substring(0,10)||({furgon:'Furgón',van:'Van',tt:'TT'}[v.type]);
+      vehChips.push('<div class="elem-chip" onclick="addVehicleToCanvas(\''+v.type+'\',\''+abbrev+'\',\''+nomLabel.replace(/'/g,'')+'\')"><img src="'+svgUrl+'" style="height:36px;object-fit:contain"></div>');
+    }
+  });
+  if(vehChips.length) groups.push({title:'Vehículos', chips:vehChips});
+
+  // Señalización — uno por tipo (puede añadirse múltiples veces), sin 'otra' (noMap)
+  var sigChips = [];
+  var sigData = d.señalizacion||{};
+  signalItems.forEach(function(s){
+    if(s.noMap) return; // 'otra' no va al mapa
+    if(!(sigData[s.id]>0)) return;
+    var iconHtml = s.id==='cinta'
+      ? '<img src="'+getCintaSVGDataURL()+'" style="height:14px;object-fit:contain">'
+      : s.id==='conos'
+        ? '<img src="'+getConeSVGDataURL()+'" style="height:22px;object-fit:contain">'
+        : '<span style="font-size:1.1rem;line-height:1">'+s.icon+'</span>';
+    sigChips.push('<div class="elem-chip" onclick="addSignalToCanvas(\''+s.id+'\')"><div>'+iconHtml+'</div><div class="elem-chip-label">'+s.name.substring(0,7)+'</div></div>');
+  });
+  if(sigChips.length) groups.push({title:'Señalización', chips:sigChips});
+
+  if(!groups.length){
+    body.innerHTML='<div style="font-size:.75rem;color:var(--text-dim);font-family:Rajdhani,sans-serif;padding:4px 0">Edita el DOE para configurar vehículos, agentes y señalización.</div>';
+    return;
+  }
+  groups.forEach(function(g){
+    var el = document.createElement('div');
+    el.className='elem-group';
+    el.innerHTML='<div class="elem-group-title">'+g.title+'</div><div class="elem-row">'+g.chips.join('')+'</div>';
+    body.appendChild(el);
+  });
+}
+
+/* ===== CANVAS ADD FUNCTIONS ===== */
+function addFabricImage(url, opts){
+  if(!fabricCanvas) return;
+  fabric.Image.fromURL(url, function(img){
+    img.set(Object.assign({
+      left:40+Math.random()*80, top:40+Math.random()*80,
+      selectable:true, hasBorders:true, hasControls:true
+    }, opts||{}));
+    fabricCanvas.add(img);
+    fabricCanvas.setActiveObject(img);
+    fabricCanvas.renderAll();
+    saveToHistory(); autoSaveCanvas();
+  });
+}
+
+function addDecToCanvas(){
+  // ⚡ como texto Fabric
+  var t = new fabric.Text('⚡',{left:50+Math.random()*60,top:50+Math.random()*60,fontSize:28,selectable:true});
+  if(!fabricCanvas) return;
+  fabricCanvas.add(t); fabricCanvas.setActiveObject(t); fabricCanvas.renderAll();
+  saveToHistory(); autoSaveCanvas();
+}
+
+function addRifleToCanvas(){
+  addFabricImage(getRifleSVGDataURL(), {scaleX:1.2, scaleY:1.2});
+}
+
+function addMandoToCanvas(rank){
+  addFabricImage(getMandoStripesSVGDataURL(rank), {scaleX:1.5, scaleY:1.5});
+}
+
+function addVehicleToCanvas(type, abbrev, label){
+  addFabricImage(getVehicleSVGDataURL(type, abbrev), {scaleX:1.2, scaleY:1.2});
+}
+
+function addSignalToCanvas(id){
+  if(!fabricCanvas) return;
+  if(id==='conos'){
+    addFabricImage(getConeSVGDataURL(), {scaleX:1.1, scaleY:1.1});
+  } else if(id==='cinta'){
+    addFabricImage(getCintaSVGDataURL(), {scaleX:1.5, scaleY:1.5});
+  } else {
+    var s = signalItems.find(function(si){return si.id===id});
+    if(!s) return;
+    var t = new fabric.Text(s.icon,{left:50+Math.random()*80,top:50+Math.random()*80,fontSize:26,selectable:true});
+    fabricCanvas.add(t); fabricCanvas.setActiveObject(t); fabricCanvas.renderAll();
+    saveToHistory(); autoSaveCanvas();
+  }
+}
+
+/* ===== MAPS INTEGRATION ===== */
+function openMapsForLocation(){
+  var lugar=document.getElementById('doe-lugar').value.trim();
+  var enc=encodeURIComponent(lugar||'');
+  var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+  var a=document.createElement('a');
+  a.href=isIOS?'maps://?q='+enc:'geo:0,0?q='+enc;
+  a.style.display='none';document.body.appendChild(a);a.click();
+  setTimeout(function(){document.body.removeChild(a);},300);
+  showToast('Abriendo Maps...','📍');
+  document.getElementById('doe-lugar').addEventListener('blur',function(){
+    var addr=this.value.trim();
+    if(addr){currentDOE.lugarLink='https://maps.google.com/?q='+encodeURIComponent(addr);
+      var p=document.getElementById('location-link-preview');
+      if(p){p.style.display='block';p.textContent='📍 Enlace Maps guardado';}}
+  },{once:true});
+}
+function openGoogleMapsCapture(){
+  var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+  var a=document.createElement('a');a.href=isIOS?'maps://':'geo:';
+  a.style.display='none';document.body.appendChild(a);a.click();
+  setTimeout(function(){document.body.removeChild(a);},300);
+  showToast('Captura la zona y vuelve para adjuntar','🗺️');
+}
+
+/* ===== PWA INSTALL ===== */
+var deferredPrompt = null;
+
+function triggerInstall(){
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(r){if(r.outcome==='accepted'){showToast('App instalada!','📲');updateInstallUI('installed');}deferredPrompt=null;});
+    return;
+  }
+  if(window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone){showToast('Ya instalada','✅');updateInstallUI('installed');return;}
+  var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+  var isSafari=/^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  var msg=isIOS&&isSafari?'iOS Safari: toca el boton compartir y selecciona Añadir a pantalla de inicio':isIOS?'Abre esta URL en Safari para instalar':'Android Chrome: menu de tres puntos → Instalar aplicacion';
+  var html='<div style="position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:20px" id="inst-guide" onclick="if(event.target.id==='inst-guide')this.remove()">'
+    +'<div style="background:var(--bg-secondary);border-radius:16px;padding:22px;max-width:320px;width:100%;border:1px solid var(--border-bright);text-align:center">'
+    +'<div style="font-size:2.5rem;margin-bottom:10px">📲</div>'
+    +'<div style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:1rem;color:var(--text-primary);margin-bottom:12px">Instalar DOEs</div>'
+    +'<div style="font-size:.82rem;color:var(--text-secondary);line-height:1.7;margin-bottom:16px">'+msg+'</div>'
+    +'<button onclick="document.getElementById('inst-guide').remove()" class="btn btn-primary" style="width:100%">Entendido</button>'
+    +'</div></div>';
+  document.body.insertAdjacentHTML('beforeend',html);
+}
+
+function updateInstallUI(state){
+  var btn=document.getElementById('install-settings-btn');
+  var txt=document.getElementById('install-status-text');
+  if(state==='installed'){if(btn){btn.textContent='Instalada ✓';btn.disabled=true;}if(txt)txt.textContent='App instalada';}
+  else if(state==='available'){if(btn){btn.textContent='Instalar ahora!';btn.disabled=false;}if(txt)txt.textContent='Disponible para instalar';}
+}
+
+/* ===== FABRIC CANVAS INIT ===== */
+function initFabricCanvas(d){
+  var wrap = document.getElementById('editor-wrap');
+  var canvasEl = document.getElementById('editor-canvas');
+  if(!canvasEl) return;
+
+  // Size canvas to wrap
+  var W = wrap.clientWidth;
+  var H = wrap.clientHeight - 100; // approx toolbar height
+  canvasEl.width = W;
+  canvasEl.height = H;
+
+  if(fabricCanvas){ fabricCanvas.dispose(); }
+  fabricCanvas = new fabric.Canvas('editor-canvas', {
+    selection: true,
+    preserveObjectStacking: true,
+    enableRetinaScaling: false,
+  });
+  fabricCanvas.setWidth(W);
+  fabricCanvas.setHeight(Math.max(H, 300));
+
+  // No map placeholder
+  var noMap = document.getElementById('canvas-no-map');
+
+  if(d.mapa){
+    noMap.classList.add('hidden');
+    fabric.Image.fromURL(d.mapa, function(img){
+      var scale = Math.min(W/img.width, fabricCanvas.getHeight()/img.height);
+      img.set({
+        left: W/2, top: fabricCanvas.getHeight()/2,
+        originX:'center', originY:'center',
+        scaleX: scale, scaleY: scale,
+        selectable: false, evented: false,
+        id: '_bg_map'
+      });
+      fabricCanvas.add(img);
+      fabricCanvas.sendToBack(img);
+      // Restore saved canvas state
+      if(d.canvasJSON){
+        fabricCanvas.loadFromJSON(d.canvasJSON, function(){
+          // Re-lock background
+          fabricCanvas.getObjects().forEach(function(o){
+            if(o.id==='_bg_map'){ o.selectable=false; o.evented=false; }
+          });
+          fabricCanvas.renderAll();
+          saveToHistory();
+        });
+      } else {
+        fabricCanvas.renderAll();
+        saveToHistory();
+      }
+    });
+  } else {
+    noMap.classList.remove('hidden');
+    if(d.canvasJSON){
+      fabricCanvas.loadFromJSON(d.canvasJSON, function(){
+        fabricCanvas.renderAll();
+        saveToHistory();
+      });
+    }
+  }
+
+  // Double tap to delete
+  fabricCanvas.on('mouse:dblclick', function(opt){
+    var target = opt.target;
+    if(target && target.id !== '_bg_map'){
+      fabricCanvas.remove(target);
+      fabricCanvas.renderAll();
+      saveToHistory();
+      autoSaveCanvas();
+    }
+  });
+
+  // Pinch-to-zoom
+  var _lpd=0;
+  function _pd(t){var dx=t[0].clientX-t[1].clientX,dy=t[0].clientY-t[1].clientY;return Math.sqrt(dx*dx+dy*dy);}
+  fabricCanvas.wrapperEl.addEventListener('touchstart',function(e){if(e.touches.length===2)_lpd=_pd(e.touches);},{passive:true});
+  fabricCanvas.wrapperEl.addEventListener('touchmove',function(e){if(e.touches.length===2){e.preventDefault();var d=_pd(e.touches);if(_lpd>0){var z=Math.min(Math.max(fabricCanvas.getZoom()*(1+(d-_lpd)*0.01),0.15),10);fabricCanvas.zoomToPoint({x:fabricCanvas.width/2,y:fabricCanvas.height/2},z);fabricCanvas.renderAll();}_lpd=d;}},{passive:false});
+  fabricCanvas.wrapperEl.addEventListener('touchend',function(){_lpd=0;},{passive:true});
+
+  // Drawing mode events
+  fabricCanvas.on('mouse:down', onCanvasMouseDown);
+  fabricCanvas.on('mouse:move', onCanvasMouseMove);
+  fabricCanvas.on('mouse:up', onCanvasMouseUp);
+
+  // Auto-save on object modified
+  fabricCanvas.on('object:modified', function(){ saveToHistory(); autoSaveCanvas(); });
+  fabricCanvas.on('object:added', function(){ autoSaveCanvas(); });
+}
+
+function handleEditorMapUpload(e){
+  var file=e.target.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    var data=loadDB();if(detailIndex<0||!data[detailIndex])return;
+    data[detailIndex].mapa=ev.target.result;data[detailIndex].mapFinal=null;
+    if(data[detailIndex].canvasJSON&&data[detailIndex].canvasJSON.objects){
+      data[detailIndex].canvasJSON.objects=data[detailIndex].canvasJSON.objects.filter(function(o){return o.id!=='_bg_map';});
+    }
+    saveDB(data);
+    if(fabricCanvas){fabricCanvas.dispose();fabricCanvas=null;}
+    document.getElementById('canvas-no-map').classList.add('hidden');
+    document.getElementById('map-finalized').classList.remove('active');
+    setTimeout(function(){initFabricCanvas(data[detailIndex]);},80);
+    showToast('Mapa actualizado','🗺️');
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ===== DRAWING TOOLS ===== */
+function setTool(tool){
+  editorTool = tool;
+  document.querySelectorAll('.tool-btn').forEach(function(b){b.classList.remove('active')});
+  document.getElementById('tool-'+tool).classList.add('active');
+  if(!fabricCanvas) return;
+  fabricCanvas.isDrawingMode = false;
+  fabricCanvas.selection = (tool==='select');
+  fabricCanvas.defaultCursor = (tool==='select') ? 'default' : 'crosshair';
+  fabricCanvas.getObjects().forEach(function(o){
+    if(o.id!=='_bg_map') o.selectable = (tool==='select');
+  });
+  fabricCanvas.renderAll();
+}
+
+function setToolColor(el){
+  document.querySelectorAll('.color-tool').forEach(function(d){d.classList.remove('active')});
+  el.classList.add('active');
+  editorColor = el.dataset.color;
+  // Update selected object color if any
+  if(fabricCanvas){
+    var obj = fabricCanvas.getActiveObject();
+    if(obj && obj.id!=='_bg_map'){
+      obj.set({stroke:editorColor, fill:'transparent'});
+      if(obj.type==='i-text') obj.set({fill:editorColor});
+      fabricCanvas.renderAll();
+      autoSaveCanvas();
+    }
+  }
+}
+
+var _drawOrig = {x:0,y:0};
+function onCanvasMouseDown(opt){
+  if(editorTool==='select') return;
+  if(!fabricCanvas) return;
+  var pointer = fabricCanvas.getPointer(opt.e);
+  _drawOrig = {x:pointer.x, y:pointer.y};
+  isDrawingShape = true;
+
+  if(editorTool==='text'){
+    var txt = new fabric.IText('Texto', {
+      left: pointer.x, top: pointer.y,
+      fill: editorColor,
+      fontFamily: 'Rajdhani, sans-serif',
+      fontSize: 18, fontWeight: '700',
+      selectable: true, editable: true,
+    });
+    fabricCanvas.add(txt);
+    fabricCanvas.setActiveObject(txt);
+    txt.enterEditing();
+    fabricCanvas.renderAll();
+    isDrawingShape=false;
+    saveToHistory();
+    return;
+  }
+  if(editorTool==='arrow'){
+    activeShape = new fabric.Line([pointer.x,pointer.y,pointer.x,pointer.y],{
+      stroke:editorColor, strokeWidth:3, selectable:false,
+      strokeLineCap:'round', id:'_tmp_arrow'
+    });
+    fabricCanvas.add(activeShape);
+    return;
+  }
+  if(editorTool==='rect'){
+    activeShape = new fabric.Rect({
+      left:pointer.x, top:pointer.y, width:0, height:0,
+      fill:'transparent', stroke:editorColor, strokeWidth:3,
+      selectable:false, id:'_tmp_rect'
+    });
+    fabricCanvas.add(activeShape);
+    return;
+  }
+  if(editorTool==='circle'){
+    activeShape = new fabric.Ellipse({
+      left:pointer.x, top:pointer.y, rx:0, ry:0,
+      fill:'transparent', stroke:editorColor, strokeWidth:3,
+      selectable:false, id:'_tmp_circle'
+    });
+    fabricCanvas.add(activeShape);
+    return;
+  }
+}
+
+function onCanvasMouseMove(opt){
+  if(!isDrawingShape || !activeShape || !fabricCanvas) return;
+  var pointer = fabricCanvas.getPointer(opt.e);
+  var ox=_drawOrig.x, oy=_drawOrig.y;
+  if(editorTool==='arrow'){
+    activeShape.set({x2:pointer.x, y2:pointer.y});
+  } else if(editorTool==='rect'){
+    var w=pointer.x-ox, h=pointer.y-oy;
+    activeShape.set({
+      left:w<0?pointer.x:ox, top:h<0?pointer.y:oy,
+      width:Math.abs(w), height:Math.abs(h)
+    });
+  } else if(editorTool==='circle'){
+    var rx=Math.abs(pointer.x-ox)/2, ry=Math.abs(pointer.y-oy)/2;
+    activeShape.set({
+      left:Math.min(ox,pointer.x), top:Math.min(oy,pointer.y),
+      rx:rx, ry:ry
+    });
+  }
+  fabricCanvas.renderAll();
+}
+
+function onCanvasMouseUp(opt){
+  if(!isDrawingShape || !fabricCanvas) return;
+  isDrawingShape=false;
+  if(activeShape){
+    // Add arrowhead for arrow tool
+    if(editorTool==='arrow'){
+      var line = activeShape;
+      var dx = line.get('x2')-line.get('x1');
+      var dy = line.get('y2')-line.get('y1');
+      var angle = Math.atan2(dy,dx)*(180/Math.PI);
+      var triangle = new fabric.Triangle({
+        left: line.get('x2'), top: line.get('y2'),
+        width:12, height:14,
+        fill:editorColor, stroke:editorColor,
+        angle: angle+90, originX:'center', originY:'center',
+        selectable:false
+      });
+      fabricCanvas.add(triangle);
+    }
+    activeShape.set({selectable:true, id:''});
+    fabricCanvas.setActiveObject(activeShape);
+    fabricCanvas.renderAll();
+    saveToHistory();
+    activeShape=null;
+  }
+}
+
+/* ===== ADD ELEMENTS ===== */
+function addTextToCanvas(icon, label){
+  if(!fabricCanvas) return;
+  var txt = new fabric.IText(icon+'\n'+label, {
+    left: 60+Math.random()*100, top: 60+Math.random()*100,
+    fill: '#ffffff',
+    fontFamily: 'Arial',
+    fontSize: 22, textAlign:'center',
+    lineHeight:1.1,
+    stroke:'rgba(0,0,0,0.6)', strokeWidth:1,
+    selectable:true, editable:false,
+  });
+  fabricCanvas.add(txt);
+  fabricCanvas.setActiveObject(txt);
+  fabricCanvas.renderAll();
+  saveToHistory();
+  autoSaveCanvas();
+}
+
+function addAgentToCanvas(idx, ag){
+  addTextToCanvas(ag.icon, ag.label);
+}
+
+/* ===== HISTORY ===== */
+function saveToHistory(){
+  if(!fabricCanvas) return;
+  var json = JSON.stringify(fabricCanvas.toJSON(['id','selectable','evented']));
+  if(canvasHistoryIdx<canvasHistory.length-1){
+    canvasHistory = canvasHistory.slice(0,canvasHistoryIdx+1);
+  }
+  canvasHistory.push(json);
+  if(canvasHistory.length>30) canvasHistory.shift();
+  canvasHistoryIdx = canvasHistory.length-1;
+}
+
+function editorZoom(f){if(!fabricCanvas)return;var z=Math.min(Math.max(fabricCanvas.getZoom()*f,0.15),10);fabricCanvas.zoomToPoint({x:fabricCanvas.width/2,y:fabricCanvas.height/2},z);fabricCanvas.renderAll();}
+function editorZoomReset(){if(!fabricCanvas)return;fabricCanvas.setViewportTransform([1,0,0,1,0,0]);fabricCanvas.renderAll();}
+
+function editorUndo(){
+  if(!fabricCanvas||canvasHistoryIdx<=0) return;
+  canvasHistoryIdx--;
+  fabricCanvas.loadFromJSON(canvasHistory[canvasHistoryIdx], function(){
+    fabricCanvas.getObjects().forEach(function(o){
+      if(o.id==='_bg_map'){ o.selectable=false; o.evented=false; }
+    });
+    fabricCanvas.renderAll();
+    autoSaveCanvas();
+  });
+}
+
+function editorClear(){
+  if(!fabricCanvas) return;
+  var toRemove = fabricCanvas.getObjects().filter(function(o){return o.id!=='_bg_map'});
+  toRemove.forEach(function(o){fabricCanvas.remove(o)});
+  fabricCanvas.renderAll();
+  saveToHistory();
+  autoSaveCanvas();
+  showToast('Dibujos eliminados','🗑️');
+}
+
+/* ===== AUTO SAVE CANVAS ===== */
+function autoSaveCanvas(){
+  if(!fabricCanvas||detailIndex<0) return;
+  var data = loadDB();
+  if(!data[detailIndex]) return;
+  data[detailIndex].canvasJSON = fabricCanvas.toJSON(['id','selectable','evented']);
+  saveDB(data);
+}
+
+/* ===== FINALIZE MAP ===== */
+function finalizeMap(){
+  if(!fabricCanvas) return;
+  // Deselect all
+  fabricCanvas.discardActiveObject();
+  fabricCanvas.renderAll();
+  var dataURL = fabricCanvas.toDataURL({format:'png',quality:0.92,multiplier:1});
+  var data = loadDB();
+  if(data[detailIndex]){
+    data[detailIndex].mapFinal = dataURL;
+    data[detailIndex].finalizado = true;
+    saveDB(data);
+    renderDOEList();
+  }
+  document.getElementById('map-finalized-img').src = dataURL;
+  document.getElementById('map-finalized').classList.add('active');
+  showToast('Mapa finalizado','✅');
+}
+
+function unfinalizeMap(){
+  document.getElementById('map-finalized').classList.remove('active');
+}
+
+/* ===== RESULTADOS ===== */
+function buildResultadosGrid(d){
+  var r = d.resultados||{};
+  var grid = document.getElementById('resultados-grid');
+  grid.innerHTML = RESULTADO_FIELDS.map(function(f){
+    var val = r[f.id]||0;
+    return '<div class="resultado-card">\
+      <div class="resultado-label">'+f.icon+' '+f.label+'</div>\
+      <div class="num-input">\
+        <button class="num-btn" onclick="changeNum(\'res-'+f.id+'\',-1)">−</button>\
+        <input type="number" class="num-val" id="res-'+f.id+'" value="'+val+'" min="0">\
+        <button class="num-btn" onclick="changeNum(\'res-'+f.id+'\',1)">+</button>\
+      </div>\
+    </div>';
+  }).join('');
+  document.getElementById('resultado-otra').value = (d.resultados&&d.resultados.otra)||'';
+}
+
+function saveResultados(){
+  var data = loadDB();
+  if(detailIndex<0||!data[detailIndex]) return;
+  var r = {};
+  RESULTADO_FIELDS.forEach(function(f){
+    var el = document.getElementById('res-'+f.id);
+    r[f.id] = el ? (parseInt(el.value)||0) : 0;
+  });
+  r.otra = document.getElementById('resultado-otra').value.trim();
+  data[detailIndex].resultados = r;
+  saveDB(data);
+  showToast('Resultados guardados','✅');
+}
+
+/* ===== EXPORT DOE PDF ===== */
+function exportDOEPDF(){
+  var data = loadDB();
+  if(detailIndex<0||!data[detailIndex]) return;
+  var d = data[detailIndex];
+  var {jsPDF} = window.jspdf;
+  var doc = new jsPDF({unit:'mm', format:'a4'});
+  var margin = 14;
+  var pw = 210 - margin*2;
+  var y = 16;
+
+  // Title block
+  var s=loadSettings();
+  doc.setFillColor(8,11,16);doc.rect(0,0,210,34,'F');
+  doc.setFillColor(26,111,196);doc.rect(0,0,4,34,'F');
+  var titleX=margin;
+  if(s.logo){try{doc.addImage(s.logo,'JPEG',margin,4,22,22);titleX=margin+26;}catch(e){}}
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold');doc.setFontSize(14);
+  doc.text('DISPOSITIVO OPERATIVO ESPECIAL',titleX,13);
+  doc.setFontSize(8);doc.setFont('helvetica','normal');
+  doc.setTextColor(140,160,180);
+  doc.text((s.orgName||'Unidad Policial')+'  ·  '+(d.fecha||''),titleX,20);
+  doc.text((d.lugar||''),titleX,27);
+  y=42;
+
+  doc.setTextColor(20,20,30);
+
+  // Datos generales
+  doc.setFont('helvetica','bold'); doc.setFontSize(11);
+  doc.text('DATOS DEL DISPOSITIVO',margin,y); y+=6;
+  doc.setDrawColor(26,111,196); doc.setLineWidth(.5);
+  doc.line(margin,y,210-margin,y); y+=5;
+  doc.setFont('helvetica','normal'); doc.setFontSize(9);
+
+  var rows1 = [
+    ['Fecha:', d.fecha||'—'],
+    ['Lugar:', d.lugar||'—'],
+    ['Indicativos:', (d.indicativos||[]).join(', ')||'—'],
+    ['Agentes:', ''+(d.agentes||0)],
+    ['Mandos:', ''+(d.mandos||0)],
+  ];
+  rows1.forEach(function(r){
+    doc.setFont('helvetica','bold'); doc.text(r[0],margin,y);
+    doc.setFont('helvetica','normal'); doc.text(r[1],margin+28,y);
+    // Location link
+    if(r[0]==='Lugar:' && d.lugarLink){
+      doc.setTextColor(26,111,196);
+      doc.textWithLink('Ver en Google Maps', margin+28+doc.getTextWidth(r[1])+4, y, {url: d.lugarLink});
+      doc.setTextColor(20,20,30);
+    }
+    y+=5;
+  });
+  y+=3;
+
+  // Vehículos
+  if((d.vehiculos||[]).length){
+    doc.setFont('helvetica','bold'); doc.setFontSize(11);
+    doc.text('VEHÍCULOS',margin,y); y+=6;
+    doc.line(margin,y,210-margin,y); y+=5;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9);
+    (d.vehiculos||[]).forEach(function(v){
+      var typeLabel = {furgon:'Furgón',van:'Van',tt:'Todo Terreno'}[v.type];
+      doc.text('• '+typeLabel+' x'+v.qty+(v.nombres.filter(Boolean).length?' ('+v.nombres.filter(Boolean).join(', ')+')':''),margin,y); y+=5;
+    });
+    y+=3;
+  }
+
+  var sigKeys = Object.entries(d.señalizacion||{}).filter(function(e){return e[0]!=='otra_desc'});
+  if(sigKeys.length){
+    doc.setFont('helvetica','bold'); doc.setFontSize(11);
+    doc.text('SEÑALIZACIÓN',margin,y); y+=6;
+    doc.line(margin,y,210-margin,y); y+=5;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9);
+    sigKeys.forEach(function(e){
+      var s = signalItems.find(function(si){return si.id===e[0]});
+      if(s){ doc.text('• '+s.name+': '+e[1],margin,y); y+=5; }
+    });
+    // Otra señalización description
+    if(d.señalizacion.otra_desc){
+      doc.setFont('helvetica','italic');
+      doc.text('  Descripción otra señalización: '+d.señalizacion.otra_desc, margin, y); y+=5;
+      doc.setFont('helvetica','normal');
+    }
+    y+=3;
+  }
+
+  // Mapa
+  var mapSrc = d.mapFinal || d.mapa;
+  if(mapSrc){
+    if(y>190){doc.addPage();y=14;}
+    doc.setFont('helvetica','bold'); doc.setFontSize(11);
+    doc.text('PLANO DEL DISPOSITIVO',margin,y); y+=6;
+    doc.line(margin,y,210-margin,y); y+=5;
+    try{
+      var imgH = Math.min(110, pw*0.7);
+      doc.addImage(mapSrc,'PNG',margin,y,pw,imgH);
+      y+=imgH+6;
+    }catch(e){}
+  }
+
+  // Resultados
+  var r = d.resultados||{};
+  var hasResults = RESULTADO_FIELDS.some(function(f){return (r[f.id]||0)>0});
+  if(hasResults||r.otra){
+    if(y>220){doc.addPage();y=14;}
+    doc.setFont('helvetica','bold'); doc.setFontSize(11);
+    doc.text('RESULTADOS',margin,y); y+=6;
+    doc.line(margin,y,210-margin,y); y+=5;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9);
+    RESULTADO_FIELDS.forEach(function(f){
+      var v = r[f.id]||0;
+      if(v>0){
+        doc.setFont('helvetica','bold'); doc.text(f.label+':',margin,y);
+        doc.setFont('helvetica','normal'); doc.text(''+v,margin+70,y); y+=5;
+        if(y>270){doc.addPage();y=14;}
+      }
+    });
+    if(r.otra){
+      doc.setFont('helvetica','bold'); doc.text('Otra actuación:',margin,y); y+=5;
+      doc.setFont('helvetica','normal');
+      var lines = doc.splitTextToSize(r.otra, pw);
+      doc.text(lines,margin,y); y+=lines.length*5+3;
+    }
+  }
+
+  // Footer
+  var pages = doc.getNumberOfPages();
+  for(var p=1;p<=pages;p++){
+    doc.setPage(p);
+    doc.setFontSize(8); doc.setTextColor(150,150,150);
+    doc.text('DOEs · Dispositivo Operativo Especial · Generado: '+new Date().toLocaleDateString('es-ES'),margin,290);
+    doc.text('Pág. '+p+'/'+pages,196,290,'right');
+  }
+
+  doc.save('DOE-'+(d.lugar||'dispositivo').replace(/[^a-zA-Z0-9]/g,'-')+'-'+d.fecha+'.pdf');
+  showToast('PDF generado','📄');
+}
+
+
+/* ========== DELETE ========== */
+var confirmCallback = null;
+function confirmDeleteDOE(idx){
+  document.getElementById('confirm-icon').textContent='🗑️';
+  document.getElementById('confirm-title').textContent='¿Eliminar DOE?';
+  document.getElementById('confirm-text').textContent='Se eliminará este dispositivo y todos sus datos. Esta acción no se puede deshacer.';
+  document.getElementById('confirm-ok-btn').textContent='Eliminar';
+  confirmCallback = function(){
+    var data = loadDB();
+    data.splice(idx,1);
+    saveDB(data);
+    renderDOEList();
+    showToast('DOE eliminado','🗑️');
+  };
+  document.getElementById('confirm-modal').classList.add('active');
+}
+function confirmDeleteAll(){
+  document.getElementById('confirm-icon').textContent='⚠️';
+  document.getElementById('confirm-title').textContent='¿Borrar todo?';
+  document.getElementById('confirm-text').textContent='Se eliminarán TODOS los DOEs y sus datos. Esta acción no se puede deshacer.';
+  document.getElementById('confirm-ok-btn').textContent='Borrar todo';
+  confirmCallback = function(){
+    saveDB([]);
+    renderDOEList();
+    showToast('Datos eliminados','🗑️');
+  };
+  document.getElementById('confirm-modal').classList.add('active');
+}
+function closeConfirm(){document.getElementById('confirm-modal').classList.remove('active');confirmCallback=null;}
+function confirmAction(){var cb=confirmCallback;closeConfirm();if(cb)cb();}
+
+/* ========== STATS ========== */
+var statsChart = null;
+var currentStatsFilter = 'hoy';
+var statsCustomDate = null; // for custom date selections
+
+function setStatsFilter(f, btn){
+  currentStatsFilter = f;
+  statsCustomDate = null;
+  document.querySelectorAll('.stats-filter').forEach(function(b){b.classList.remove('active')});
+  if(btn) btn.classList.add('active');
+  renderDatePicker(f);
+  renderStats();
+}
+
+function renderDatePicker(f){
+  var wrap = document.getElementById('stats-date-picker');
+  var today = new Date().toISOString().split('T')[0];
+  var nowYear = new Date().getFullYear();
+
+  if(f==='hoy'){
+    wrap.innerHTML='<div class="stats-date-picker-wrap"><span class="stats-date-label">Día:</span>'
+      +'<input type="date" class="form-input" id="dp-date" value="'+today+'" onchange="statsCustomDate=this.value;renderStats()">'
+      +'</div>';
+  } else if(f==='semana'){
+    // ISO week input
+    var isoWeek = getISOWeekString(new Date());
+    wrap.innerHTML='<div class="stats-date-picker-wrap"><span class="stats-date-label">Semana:</span>'
+      +'<input type="week" class="form-input" id="dp-week" value="'+isoWeek+'" onchange="statsCustomDate=this.value;renderStats()">'
+      +'</div>';
+  } else if(f==='mes'){
+    var nowMonth = new Date().toISOString().slice(0,7);
+    wrap.innerHTML='<div class="stats-date-picker-wrap"><span class="stats-date-label">Mes:</span>'
+      +'<input type="month" class="form-input" id="dp-month" value="'+nowMonth+'" onchange="statsCustomDate=this.value;renderStats()">'
+      +'</div>';
+  } else if(f==='anio'){
+    var yearOpts='';
+    for(var y=nowYear;y>=nowYear-5;y--) yearOpts+='<option value="'+y+'"'+(y===nowYear?' selected':'')+'>'+y+'</option>';
+    wrap.innerHTML='<div class="stats-date-picker-wrap"><span class="stats-date-label">Año:</span>'
+      +'<select class="form-input" id="dp-year" onchange="statsCustomDate=this.value;renderStats()">'+yearOpts+'</select>'
+      +'</div>';
+    statsCustomDate = String(nowYear);
+  } else {
+    wrap.innerHTML='';
+  }
+}
+
+function getISOWeekString(date){
+  var d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  var dayNum = d.getUTCDay()||7;
+  d.setUTCDate(d.getUTCDate()+4-dayNum);
+  var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  var weekNo = Math.ceil((((d-yearStart)/86400000)+1)/7);
+  return d.getUTCFullYear()+'-W'+(weekNo<10?'0':'')+weekNo;
+}
+
+function filterDOEs(f, customDate){
+  var data = loadDB();
+  var cd = customDate || statsCustomDate;
+
+  return data.filter(function(d){
+    if(!d.fecha) return false;
+    var dt = new Date(d.fecha+'T12:00:00');
+
+    if(f==='hoy'){
+      var target = cd ? new Date(cd+'T12:00:00') : new Date();
+      return dt.toDateString()===target.toDateString();
+    }
+    if(f==='semana'){
+      if(cd){
+        // cd = "2024-W22"
+        var parts = cd.split('-W');
+        var weekYear = parseInt(parts[0]);
+        var weekNum = parseInt(parts[1]);
+        var startOfWeek = getDateOfISOWeek(weekNum, weekYear);
+        var endOfWeek = new Date(startOfWeek); endOfWeek.setDate(startOfWeek.getDate()+6);
+        return dt>=startOfWeek && dt<=endOfWeek;
+      } else {
+        var now = new Date();
+        var start = new Date(now); start.setDate(now.getDate()-now.getDay()+1); start.setHours(0,0,0,0);
+        return dt>=start && dt<=now;
+      }
+    }
+    if(f==='mes'){
+      if(cd){
+        var p = cd.split('-'); var m=parseInt(p[1])-1; var y=parseInt(p[0]);
+        return dt.getMonth()===m && dt.getFullYear()===y;
+      }
+      var n=new Date(); return dt.getMonth()===n.getMonth()&&dt.getFullYear()===n.getFullYear();
+    }
+    if(f==='anio'){
+      var yr = cd ? parseInt(cd) : new Date().getFullYear();
+      return dt.getFullYear()===yr;
+    }
+    return true; // total
+  });
+}
+
+function getDateOfISOWeek(w, y){
+  var simple = new Date(y, 0, 1+((w-1)*7));
+  var dow = simple.getDay();
+  var ISOweekStart = simple;
+  if(dow<=4) ISOweekStart.setDate(simple.getDate()-simple.getDay()+1);
+  else ISOweekStart.setDate(simple.getDate()+8-simple.getDay());
+  return ISOweekStart;
+}
+
+function aggregateStats(does){
+  var totals = {};
+  STATS_KEYS.forEach(function(k){totals[k.id]=0});
+  does.forEach(function(d){
+    var r = d.resultados||{};
+    STATS_KEYS.forEach(function(k){ totals[k.id]+=parseInt(r[k.id]||0); });
+  });
+  return totals;
+}
+
+function getPeriodLabel(){
+  var f = currentStatsFilter;
+  var cd = statsCustomDate;
+  if(f==='hoy') return 'Día: '+(cd||new Date().toLocaleDateString('es-ES'));
+  if(f==='semana') return 'Semana: '+(cd||getISOWeekString(new Date()));
+  if(f==='mes'){
+    if(cd){var p=cd.split('-');return 'Mes: '+['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'][parseInt(p[1])-1]+' '+p[0];}
+    return 'Mes actual';
+  }
+  if(f==='anio') return 'Año: '+(cd||new Date().getFullYear());
+  return 'Total acumulado';
+}
+
+function renderStats(){
+  var f = currentStatsFilter;
+  var does = filterDOEs(f);
+  var totals = aggregateStats(does);
+
+  document.getElementById('stats-period-label').textContent = getPeriodLabel()+' · '+does.length+' DOE'+(does.length!==1?'s':'');
+
+  // KPIs
+  var kpis = [
+    {label:'DOEs realizados', val:does.length, highlight:true},
+    {label:'Vehículos controlados', val:totals.vehiculos_controlados},
+    {label:'Personas controladas', val:totals.personas_controladas},
+    {label:'Detenidos', val:totals.detenidos},
+  ];
+  document.getElementById('kpi-grid').innerHTML = kpis.map(function(k){
+    return '<div class="kpi-card'+(k.highlight?' highlight':'')+'"><div class="kpi-label">'+k.label+'</div><div class="kpi-value">'+k.val+'</div></div>';
+  }).join('');
+
+  // Chart
+  if(statsChart) statsChart.destroy();
+  var ctx = document.getElementById('stats-chart').getContext('2d');
+  var labels = STATS_KEYS.map(function(k){return k.label});
+  var values = STATS_KEYS.map(function(k){return totals[k.id]});
+  var colors = STATS_KEYS.map(function(k){return k.color});
+  var hasData = values.some(function(v){return v>0});
+  statsChart = new Chart(ctx,{
+    type:'doughnut',
+    data:{
+      labels:labels,
+      datasets:[{
+        data: hasData ? values : [1],
+        backgroundColor: hasData ? colors : ['#2a3a4a'],
+        borderColor: 'rgba(0,0,0,0.3)',
+        borderWidth:2
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{
+          display:true,
+          position:'bottom',
+          labels:{color:'#8a9bb0',font:{size:10},boxWidth:12,padding:8}
+        },
+        tooltip:{enabled:hasData}
+      }
+    }
+  });
+
+  // List
+  document.getElementById('stats-list').innerHTML = STATS_KEYS.map(function(k){
+    var v=totals[k.id];
+    return '<div class="stats-row'+(v===0?' style="opacity:.5"':'')+'"><div class="stats-row-label"><div class="stats-dot" style="background:'+k.color+'"></div>'+k.label+'</div><div class="stats-row-val">'+v+'</div></div>';
+  }).join('');
+}
+
+/* ========== STATS PDF (MEJORADO) ========== */
+function exportStatsPDF(){
+  var does = filterDOEs(currentStatsFilter);
+  var totals = aggregateStats(does);
+  var s = loadSettings();
+  var {jsPDF} = window.jspdf;
+  var doc = new jsPDF({unit:'mm',format:'a4'});
+  var margin = 14;
+  var pw = 210-margin*2;
+  var y = 0;
+
+  // ── CABECERA ──────────────────────────────────────────
+  doc.setFillColor(8,11,16);
+  doc.rect(0,0,210,36,'F');
+  doc.setFillColor(26,111,196);
+  doc.rect(0,0,4,36,'F');
+
+  // Logo si existe
+  if(s.logo){
+    try{ doc.addImage(s.logo,'JPEG',margin,4,24,24); }catch(e){}
+    doc.setTextColor(255,255,255);
+    doc.setFont('helvetica','bold'); doc.setFontSize(16);
+    doc.text('DOEs — Informe de Estadísticas', margin+28, 14);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9);
+    doc.setTextColor(140,160,180);
+    doc.text(s.orgName||'Unidad Policial', margin+28, 20);
+    doc.text(getPeriodLabel(), margin+28, 26);
+  } else {
+    doc.setTextColor(255,255,255);
+    doc.setFont('helvetica','bold'); doc.setFontSize(16);
+    doc.text('DOEs — Informe de Estadísticas', margin, 16);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9);
+    doc.setTextColor(140,160,180);
+    doc.text((s.orgName||'Unidad Policial')+'  ·  '+getPeriodLabel(), margin, 24);
+    doc.text('Total DOEs en el periodo: '+does.length, margin, 30);
+  }
+  y = 44;
+
+  // ── DOEs DEL PERIODO ──────────────────────────────────
+  if(does.length){
+    doc.setTextColor(20,20,30);
+    doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    doc.text('DISPOSITIVOS EN EL PERIODO', margin, y); y+=5;
+    doc.setDrawColor(26,111,196); doc.setLineWidth(.4);
+    doc.line(margin, y, 210-margin, y); y+=4;
+    doc.setFont('helvetica','normal'); doc.setFontSize(8);
+
+    does.forEach(function(d){
+      var indicativos = (d.indicativos||[]).join(', ')||'—';
+      var lugar = d.lugar||'—';
+      var fecha = d.fecha||'—';
+      doc.setFont('helvetica','bold');
+      doc.text('• '+fecha+'  –  '+lugar, margin, y);
+      doc.setFont('helvetica','normal');
+      doc.setTextColor(80,100,120);
+      doc.text('Indicativo/s: '+indicativos, margin+4, y+4);
+      doc.setTextColor(20,20,30);
+      y+=10;
+      if(y>265){doc.addPage();y=14;}
+    });
+    y+=4;
+  }
+
+  // ── GRÁFICA ───────────────────────────────────────────
+  var chartCanvas = document.getElementById('stats-chart');
+  if(chartCanvas && does.length){
+    try{
+      var chartImg = chartCanvas.toDataURL('image/png');
+      var chartSize = Math.min(pw*0.55, 80);
+      if(y+chartSize>270){doc.addPage();y=14;}
+      doc.setFont('helvetica','bold'); doc.setFontSize(10);
+      doc.setTextColor(20,20,30);
+      doc.text('DISTRIBUCIÓN DE RESULTADOS', margin, y); y+=5;
+      doc.setDrawColor(26,111,196); doc.line(margin,y,210-margin,y); y+=4;
+      var cx = margin+(pw-chartSize)/2;
+      doc.addImage(chartImg,'PNG', cx, y, chartSize, chartSize);
+      y+=chartSize+6;
+    }catch(e){}
+  }
+
+  // ── TABLA DE RESULTADOS ───────────────────────────────
+  if(y+10>270){doc.addPage();y=14;}
+  doc.setFont('helvetica','bold'); doc.setFontSize(10);
+  doc.setTextColor(20,20,30);
+  doc.text('TOTALES ACUMULADOS', margin, y); y+=5;
+  doc.setDrawColor(26,111,196); doc.line(margin,y,210-margin,y); y+=5;
+
+  STATS_KEYS.forEach(function(k,i){
+    // Alternating rows
+    if(i%2===0){ doc.setFillColor(245,248,252); doc.rect(margin,y-4,pw,7,'F'); }
+    doc.setFont('helvetica','normal'); doc.setFontSize(9);
+    doc.setTextColor(40,40,60);
+    doc.text(k.label, margin+2, y);
+    doc.setFont('helvetica','bold');
+    doc.setTextColor(26,111,196);
+    doc.text(''+totals[k.id], 210-margin-2, y, {align:'right'});
+    doc.setTextColor(40,40,60);
+    y+=7;
+    if(y>270){doc.addPage();y=14;}
+  });
+
+  // ── PIE DE PÁGINA ────────────────────────────────────
+  var pages=doc.getNumberOfPages();
+  for(var p=1;p<=pages;p++){
+    doc.setPage(p);
+    doc.setFontSize(7); doc.setTextColor(160,160,160);
+    doc.text('DOEs · Generado: '+new Date().toLocaleString('es-ES'), margin, 291);
+    doc.text('Página '+p+'/'+pages, 210-margin, 291, {align:'right'});
+    doc.setDrawColor(200,200,200); doc.line(margin,288,210-margin,288);
+  }
+
+  doc.save('DOEs-estadisticas-'+currentStatsFilter+(statsCustomDate?'-'+statsCustomDate:'')+'.pdf');
+  showToast('PDF generado','📄');
+}
+
+/* ========== SHARE STATS ========== */
+function shareStatsPDF(){
+  var does=filterDOEs(currentStatsFilter),totals=aggregateStats(does);
+  var text='DOEs - '+getPeriodLabel()+'\nDOEs: '+does.length+'\nVehiculos: '+totals.vehiculos_controlados+'\nPersonas: '+totals.personas_controladas+'\nDetenidos: '+totals.detenidos;
+  if(navigator.share){navigator.share({title:'DOEs - Estadisticas',text:text}).catch(function(e){if(e.name!=='AbortError')showToast('Exporta el PDF y compartelo','i');});}
+  else{showToast('Exporta el PDF y compartelo','i');}
+}
+
+function getShareText(isStats){
+  if(isStats){
+    return 'DOEs - Estadísticas · '+getPeriodLabel();
+  }
+  var data=loadDB();
+  var d=data[detailIndex];
+  if(!d) return 'DOE - Dispositivo Operativo';
+  return 'DOE · '+(d.fecha||'')+' · '+(d.lugar||'')+' · Indicativos: '+((d.indicativos||[]).join(', ')||'—');
+}
+
+function shareViaWhatsApp(){
+  var text = getShareText(true);
+  window.open('https://wa.me/?text='+encodeURIComponent(text+'\n(Adjunta el PDF exportado)'), '_blank');
+}
+function shareViaTelegram(){
+  var text = getShareText(true);
+  window.open('https://t.me/share/url?url=&text='+encodeURIComponent(text), '_blank');
+}
+function shareViaEmail(){
+  var text = getShareText(true);
+  window.open('mailto:?subject=DOEs+Estadísticas&body='+encodeURIComponent(text+'\n\nAdjunta el PDF exportado.'), '_blank');
+}
+
+/* ========== SHARE DOE PDF ========== */
+async function shareDOEPDF(){
+  // Generate the PDF blob, then share natively or fallback
+  var data=loadDB();
+  if(detailIndex<0||!data[detailIndex]) return;
+  var d=data[detailIndex];
+  var shareText = 'DOE · '+(d.fecha||'')+' · '+(d.lugar||'')+' · '+((d.indicativos||[]).join(', ')||'');
+
+  // Try Web Share API first (native share sheet → WhatsApp, Telegram, etc.)
+  if(navigator.share){
+    try{
+      // Generate PDF as blob
+      var pdfBlob = generateDOEPDFBlob(d);
+      if(pdfBlob && navigator.canShare && navigator.canShare({files:[pdfBlob]})){
+        await navigator.share({
+          title:'DOE · '+(d.lugar||'Dispositivo'),
+          text: shareText,
+          files:[pdfBlob]
+        });
+        return;
+      } else {
+        // Share without file
+        await navigator.share({title:'DOE · '+(d.lugar||'Dispositivo'), text:shareText});
+        return;
+      }
+    }catch(e){
+      if(e.name!=='AbortError') showShareOptions(shareText);
+    }
+  } else {
+    showShareOptions(shareText);
+  }
+}
+
+function showShareOptions(shareText){
+  var html='<div style="position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.75);display:flex;align-items:flex-end;justify-content:center" id="share-sheet" onclick="if(event.target.id===\'share-sheet\')this.remove()">'
+    +'<div style="background:var(--bg-secondary);border-radius:16px 16px 0 0;width:100%;max-width:700px;padding:16px;padding-bottom:max(16px,env(safe-area-inset-bottom));border-top:1px solid var(--border-bright)">'
+    +'<div style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:.95rem;color:var(--text-primary);margin-bottom:14px">Compartir DOE</div>'
+    +'<button onclick="exportDOEPDF();document.getElementById(\'share-sheet\').remove()" class="btn btn-primary" style="width:100%;margin-bottom:8px">Exportar PDF y compartir</button>'
+    +'<button onclick="document.getElementById(\'share-sheet\').remove()" class="btn btn-secondary" style="width:100%">Cancelar</button>'
+    +'</div></div>';
+  document.body.insertAdjacentHTML('beforeend',html);
+}
+
+function generateDOEPDFBlob(d){
+  try{
+    var {jsPDF}=window.jspdf;
+    var doc=new jsPDF({unit:'mm',format:'a4'});
+    var margin=14, pw=210-margin*2, y=16;
+    doc.setFillColor(8,11,16); doc.rect(0,0,210,28,'F');
+    doc.setFillColor(26,111,196); doc.rect(0,0,4,28,'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(14);
+    doc.text('DISPOSITIVO OPERATIVO ESPECIAL',margin,12);
+    doc.setFontSize(8); doc.setFont('helvetica','normal');
+    doc.setTextColor(140,160,180);
+    doc.text((loadSettings().orgName||'Unidad Policial')+'  ·  '+d.fecha+'  ·  '+d.lugar, margin,20);
+    y=36;
+    doc.setTextColor(20,20,30); doc.setFont('helvetica','normal'); doc.setFontSize(9);
+    [['Fecha:',d.fecha||'—'],['Lugar:',d.lugar||'—'],['Indicativos:',(d.indicativos||[]).join(', ')||'—'],['Agentes:',''+(d.agentes||0)],['Mandos:',''+(d.mandos||0)]].forEach(function(r){
+      doc.setFont('helvetica','bold'); doc.text(r[0],margin,y);
+      doc.setFont('helvetica','normal'); doc.text(r[1],margin+28,y); y+=5;
+    });
+    var mapSrc=d.mapFinal||d.mapa;
+    if(mapSrc){ try{ var ih=Math.min(100,pw*0.65); doc.addImage(mapSrc,'PNG',margin,y+4,pw,ih); y+=ih+10; }catch(e){} }
+    return new Blob([doc.output('arraybuffer')],{type:'application/pdf'});
+  }catch(e){return null;}
+}
+
+/* ========== SETTINGS ========== */
+function loadSettingsUI(){
+  var s = loadSettings();
+  var orgInput = document.getElementById('org-name-input');
+  if(orgInput) orgInput.value = s.orgName||'';
+  var darkToggle = document.getElementById('dark-toggle');
+  if(darkToggle) darkToggle.checked = s.darkMode!==false;
+  var paletteColor = s.accentColor||'#1a6fc4';
+  document.querySelectorAll('.color-dot').forEach(function(d){
+    d.classList.toggle('selected',d.dataset.color===paletteColor);
+  });
+  if(s.logo){
+    var prev = document.getElementById('logo-preview-small');
+    prev.innerHTML='<img src="'+s.logo+'" style="width:100%;height:100%;object-fit:contain;border-radius:8px">';
+    var headerWrap = document.getElementById('header-logo-wrap');
+    headerWrap.innerHTML='<img src="'+s.logo+'">';
+  }
+  if(s.orgName){
+    document.getElementById('header-org-display').textContent=s.orgName;
+  }
+}
+
+function saveOrgName(){
+  var s = loadSettings();
+  s.orgName = document.getElementById('org-name-input').value.trim();
+  saveSettings(s);
+  document.getElementById('header-org-display').textContent=s.orgName||'Dispositivos Operativos';
+  showToast('Nombre guardado');
+}
+
+function handleLogoUpload(e){
+  var file = e.target.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    var s = loadSettings();
+    s.logo = ev.target.result;
+    saveSettings(s);
+    var prev = document.getElementById('logo-preview-small');
+    prev.innerHTML='<img src="'+ev.target.result+'" style="width:100%;height:100%;object-fit:contain;border-radius:8px">';
+    var headerWrap = document.getElementById('header-logo-wrap');
+    headerWrap.innerHTML='<img src="'+ev.target.result+'">';
+    showToast('Logo actualizado');
+  };
+  reader.readAsDataURL(file);
+}
+
+function toggleTheme(dark){
+  document.documentElement.setAttribute('data-theme',dark?'':'light');
+  var s = loadSettings();
+  s.darkMode = dark;
+  saveSettings(s);
+}
+
+function setColor(el){
+  document.querySelectorAll('.color-dot').forEach(function(d){d.classList.remove('selected')});
+  el.classList.add('selected');
+  var c = el.dataset.color;
+  var g = el.dataset.glow;
+  document.documentElement.style.setProperty('--app-color',c);
+  document.documentElement.style.setProperty('--app-color-glow',g);
+  document.documentElement.style.setProperty('--accent',c);
+  var s = loadSettings();
+  s.accentColor = c;
+  s.accentGlow = g;
+  saveSettings(s);
+  showToast('Color actualizado');
+}
+
+/* ========== BACKUP ========== */
+function exportBackup(){
+  var payload = {version:1,timestamp:Date.now(),does:loadDB(),settings:loadSettings()};
+  var blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'DOEs-backup-'+new Date().toISOString().split('T')[0]+'.json';
+  a.click();
+  showToast('Backup exportado','💾');
+}
+
+function importBackup(e){
+  var file = e.target.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    try{
+      var payload = JSON.parse(ev.target.result);
+      if(payload.does) saveDB(payload.does);
+      if(payload.settings) saveSettings(payload.settings);
+      renderDOEList();
+      applySettings();
+      showToast('Backup restaurado correctamente','✅');
+    }catch(err){showToast('Archivo inválido','❌');}
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+/* ========== APPLY SETTINGS ON LOAD ========== */
+function applySettings(){
+  var s = loadSettings();
+  if(s.darkMode===false) document.documentElement.setAttribute('data-theme','light');
+  if(s.accentColor){
+    document.documentElement.style.setProperty('--app-color',s.accentColor);
+    if(s.accentGlow) document.documentElement.style.setProperty('--app-color-glow',s.accentGlow);
+  }
+  if(s.logo){
+    var headerWrap = document.getElementById('header-logo-wrap');
+    if(headerWrap) headerWrap.innerHTML='<img src="'+s.logo+'">';
+  }
+  if(s.orgName){
+    document.getElementById('header-org-display').textContent=s.orgName;
+  }
+}
+
+/* ========== PWA INSTALL EVENTS ========== */
+window.addEventListener('beforeinstallprompt',function(e){
+  e.preventDefault();
+  deferredPrompt=e;
+  document.getElementById('install-banner').classList.add('show');
+  updateInstallUI('available');
+});
+document.getElementById('install-btn').addEventListener('click',function(){
+  triggerInstall();
+});
+window.addEventListener('appinstalled',function(){
+  document.getElementById('install-banner').classList.remove('show');
+  showToast('App instalada correctamente','📲');
+  updateInstallUI('installed');
+});
+
+/* ========== SERVICE WORKER ========== */
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
+}
+
+/* ========== INIT ========== */
+document.addEventListener('DOMContentLoaded',function(){
+  applySettings();
+  renderDOEList();
+  injectVehicleCardSVGs();
+});
+
+/* ===== ELEMENTS PANEL TOGGLE ===== */
+function toggleElementsPanel(){
+  var panel = document.getElementById('elements-panel');
+  panel.classList.toggle('open');
+}
+</script>
+</body>
+</html>
