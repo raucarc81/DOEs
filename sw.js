@@ -1,4 +1,4 @@
-const CACHE = 'does-v13';
+const CACHE = 'does-v14';
 const STATIC_ASSETS = ['./', './index.html', './manifest.json'];
 
 /* ── Genera un icono PNG sintético como ArrayBuffer ── */
