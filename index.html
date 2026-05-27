@@ -927,8 +927,8 @@ textarea.form-input{resize:vertical;min-height:70px}
     <div class="header-logo">
       <span class="material-symbols-outlined" style="font-size:22px;color:var(--accent)">shield</span>
       <div class="logo-text-wrap">
-        <span class="logo-title">UNIT DOE</span>
-        <span class="logo-sub" id="header-org-display">Dispositivos Operativos</span>
+        <span class="logo-title">DOE</span>
+        <span class="logo-sub" id="header-org-display">Comisaría</span>
       </div>
     </div>
     <div class="header-actions">
@@ -2379,40 +2379,55 @@ var deferredPrompt = null;
 function triggerInstall(){
   if(deferredPrompt){
     deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(function(r){if(r.outcome==='accepted'){showToast('App instalada!','📲');updateInstallUI('installed');}deferredPrompt=null;});
+    deferredPrompt.userChoice.then(function(r){
+      if(r.outcome==='accepted'){showToast('App instalada','OK');updateInstallUI('installed');}
+      deferredPrompt=null;
+    });
     return;
   }
-  if(window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone){showToast('Ya instalada','✅');updateInstallUI('installed');return;}
+  if(window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone){
+    showToast('Ya instalada','OK');updateInstallUI('installed');return;
+  }
   var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
   var isSafari=/^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  var msg=isIOS&&isSafari?'iOS Safari: toca el boton compartir y selecciona Añadir a pantalla de inicio':isIOS?'Abre esta URL en Safari para instalar':'Android Chrome: menu de tres puntos → Instalar aplicacion';
-  var html='<div style="position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:20px" id="inst-guide" onclick="if(event.target.id===\'inst-guide\')this.remove()">'
-    +'<div style="background:var(--bg-secondary);border-radius:var(--radius);padding:22px;max-width:320px;width:100%;border:1px solid var(--border-bright);text-align:center">'
-    +'<div style="font-size:2.5rem;margin-bottom:10px">📲</div>'
-    +'<div style="font-family:var(--font-mono);font-weight:700;font-size:1rem;color:var(--text-primary);margin-bottom:12px">Instalar DOEs</div>'
-    +'<div style="font-size:.82rem;color:var(--text-secondary);line-height:1.7;margin-bottom:16px">'+msg+'</div>'
+  var msg,steps;
+  if(isIOS&&isSafari){
+    msg='iOS Safari';
+    steps=['1. Toca el boton <strong>Compartir</strong> (cuadrado con flecha) en la barra inferior','2. Desliza y toca <strong>Anadir a pantalla de inicio</strong>','3. Confirma tocando <strong>Anadir</strong>'];
+  } else if(isIOS){
+    msg='iPhone / iPad';
+    steps=['Abre esta pagina en <strong>Safari</strong> (no Chrome)','Compartir -> Anadir a pantalla de inicio'];
+  } else {
+    msg='Android / Chrome';
+    steps=['1. Toca el menu de <strong>tres puntos</strong> arriba derecha','2. Toca <strong>Instalar aplicacion</strong>','3. Confirma tocando <strong>Instalar</strong>'];
+  }
+  var stepsHTML=steps.map(function(s){return '<li style="margin-bottom:8px">'+s+'</li>';}).join('');
+  var overlay='<div style="position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.82);display:flex;align-items:flex-end;justify-content:center;padding:10px" id="inst-guide" onclick="if(event.target.id===\'inst-guide\')this.remove()">'
+    +'<div style="background:var(--bg-secondary);border-radius:20px 20px 0 0;padding:24px 20px 36px;max-width:400px;width:100%;border-top:2px solid var(--app-color)">'
+    +'<div style="width:36px;height:4px;background:var(--border-bright);border-radius:2px;margin:0 auto 22px"></div>'
+    +'<div style="font-family:var(--font-mono);font-weight:700;font-size:1rem;color:var(--text-primary);margin-bottom:4px;text-align:center;letter-spacing:2px">INSTALAR DOEs</div>'
+    +'<div style="font-size:.7rem;color:var(--text-dim);text-align:center;margin-bottom:18px;font-family:var(--font-mono);letter-spacing:1.5px;text-transform:uppercase">'+msg+'</div>'
+    +'<ol style="font-size:.83rem;color:var(--text-secondary);line-height:1.65;padding-left:18px;margin-bottom:22px">'+stepsHTML+'</ol>'
     +'<button onclick="document.getElementById(\'inst-guide\').remove()" class="btn btn-primary" style="width:100%">Entendido</button>'
     +'</div></div>';
-  document.body.insertAdjacentHTML('beforeend',html);
+  document.body.insertAdjacentHTML('beforeend',overlay);
 }
 
 function updateInstallUI(state){
   var btn=document.getElementById('install-settings-btn');
   var txt=document.getElementById('install-status-text');
+  var banner=document.getElementById('install-banner');
   if(state==='installed'){
-    if(btn){btn.textContent='✓ Instalada';btn.disabled=true;btn.style.opacity='.5';}
-    if(txt)txt.textContent='App instalada en tu dispositivo';
-    var banner=document.getElementById('install-banner');
-    if(banner) banner.classList.remove('show');
+    if(btn){btn.textContent='Instalada';btn.disabled=true;btn.style.opacity='.5';}
+    if(txt)txt.textContent='App instalada en este dispositivo';
+    if(banner)banner.classList.remove('show');
   } else if(state==='available'){
-    if(btn){btn.textContent='⬇ Instalar ahora';btn.disabled=false;btn.style.opacity='1';}
-    if(txt)txt.textContent='Lista para instalar — toca para añadir';
-    var banner=document.getElementById('install-banner');
-    if(banner) banner.classList.add('show');
+    if(btn){btn.textContent='Instalar ahora';btn.disabled=false;btn.style.opacity='1';}
+    if(txt)txt.textContent='Lista para instalar, toca el boton';
+    if(banner)banner.classList.add('show');
   } else {
-    // Default: show instructions button
-    if(btn){btn.textContent='📲 Cómo instalar';btn.disabled=false;btn.style.opacity='1';}
-    if(txt)txt.textContent='No instalada — toca para ver instrucciones';
+    if(btn){btn.textContent='Como instalar';btn.disabled=false;btn.style.opacity='1';}
+    if(txt)txt.textContent='Toca para ver instrucciones de instalacion';
   }
 }
 
@@ -2759,7 +2774,7 @@ function finalizeMap(){
   // Deselect all
   fabricCanvas.discardActiveObject();
   fabricCanvas.renderAll();
-  var dataURL = fabricCanvas.toDataURL({format:'png',quality:0.92,multiplier:1});
+  var dataURL = fabricCanvas.toDataURL({format:'png',quality:1,multiplier:2});
   var data = loadDB();
   if(data[detailIndex]){
     data[detailIndex].mapFinal = dataURL;
@@ -2876,7 +2891,7 @@ function exportDOEPDF(){
     y+=3;
   }
 
-  var sigKeys = Object.entries(d.señalizacion||{}).filter(function(e){return e[0]!=='otra_desc'});
+  var sigKeys = Object.entries(d.señalizacion||{}).filter(function(e){return e[0]!=='otra_desc' && e[1] && e[1]!==false && e[1]!==0});
   if(sigKeys.length){
     doc.setFont('helvetica','bold'); doc.setFontSize(11);
     doc.text('SEÑALIZACIÓN',margin,y); y+=6;
@@ -2884,7 +2899,7 @@ function exportDOEPDF(){
     doc.setFont('helvetica','normal'); doc.setFontSize(9);
     sigKeys.forEach(function(e){
       var s = signalItems.find(function(si){return si.id===e[0]});
-      if(s){ doc.text('• '+s.name+': '+e[1],margin,y); y+=5; }
+      if(s){ doc.text('• '+s.name,margin,y); y+=5; }
     });
     // Otra señalización description
     if(d.señalizacion.otra_desc){

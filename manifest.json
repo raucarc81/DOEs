@@ -1,14 +1,14 @@
 {
-  "name": "DOEs - Dispositivos Operativos",
+  "name": "DOEs - Dispositivos Operativos Especiales",
   "short_name": "DOEs",
-  "description": "Gestión de Dispositivos Operativos Especiales",
+  "description": "Gestión y documentación de controles de seguridad policiales",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#080b10",
-  "theme_color": "#0a0d13",
-  "orientation": "portrait-primary",
-  "lang": "es",
+  "orientation": "portrait",
+  "background_color": "#121414",
+  "theme_color": "#026be0",
+  "categories": ["productivity", "utilities"],
   "icons": [
     {
       "src": "icons/icon-192.png",
@@ -27,24 +27,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "icons/apple-touch-icon.png",
-      "sizes": "180x180",
-      "type": "image/png"
     }
-  ],
-  "categories": [
-    "productivity",
-    "utilities"
-  ],
-  "screenshots": [],
-  "id": "/",
-  "prefer_related_applications": false
+  ]
 }
