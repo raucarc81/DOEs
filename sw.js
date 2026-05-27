@@ -1,4 +1,4 @@
-const CACHE = 'does-v10';
+const CACHE = 'does-v9';
 const STATIC_ASSETS = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', e => {
