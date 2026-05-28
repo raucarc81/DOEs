@@ -773,10 +773,9 @@ textarea.form-input{resize:vertical;min-height:70px}
 }
 .toolbar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .toolbar-row:last-child{margin-bottom:0}
-.toolbar-row.col{flex-direction:column;align-items:flex-start;gap:5px}
 .toolbar-label{
   font-size:.6rem;font-weight:700;letter-spacing:1.5px;color:var(--text-dim);
-  font-family:var(--font-mono);text-transform:uppercase;flex-shrink:0;width:auto;
+  font-family:var(--font-mono);text-transform:uppercase;flex-shrink:0;width:52px;
 }
 .tool-btns{display:flex;gap:6px;flex-wrap:wrap}
 .tool-btn{
@@ -1023,7 +1022,7 @@ textarea.form-input{resize:vertical;min-height:70px}
         <div class="settings-row">
           <div class="settings-icon">🏛️</div>
           <div class="settings-info">
-            <div class="settings-label">Logo de la unidad</div>
+            <div class="settings-label">Logo de la comisaría</div>
             <div class="settings-sub">Se mostrará en cabecera y PDFs</div>
           </div>
           <div class="settings-action">
@@ -1039,7 +1038,7 @@ textarea.form-input{resize:vertical;min-height:70px}
         <div class="settings-row">
           <div class="settings-icon">🔤</div>
           <div class="settings-info">
-            <div class="settings-label">Nombre de la unidad</div>
+            <div class="settings-label">Nombre de la comisaría</div>
             <div class="settings-sub">Aparece en cabecera y documentos</div>
           </div>
           <div class="settings-action">
@@ -1462,7 +1461,11 @@ textarea.form-input{resize:vertical;min-height:70px}
         <div class="map-finalized-actions">
           <button class="btn btn-secondary" onclick="unfinalizeMap()" style="flex:1">
             <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-            Editar
+            Re-editar
+          </button>
+          <button class="btn" onclick="deleteMap()" style="flex:1;background:var(--red);color:white;border:none">
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:white"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            Borrar mapa
           </button>
           <button class="btn btn-primary" onclick="exportDOEPDF()" style="flex:1">
             <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg>
@@ -1478,7 +1481,7 @@ textarea.form-input{resize:vertical;min-height:70px}
 
     <!-- Floating toolbar -->
     <div class="editor-toolbar">
-      <div class="toolbar-row col">
+      <div class="toolbar-row">
         <span class="toolbar-label">Herramienta</span>
         <div class="tool-btns">
           <button class="tool-btn active" id="tool-select" onclick="setTool('select')">
@@ -1497,8 +1500,6 @@ textarea.form-input{resize:vertical;min-height:70px}
             <svg viewBox="0 0 24 24"><path d="M5 4v3h5.5v12h3V7H19V4z"/></svg>Texto
           </button>
         </div>
-      </div>
-      <div class="toolbar-row" style="justify-content:flex-end">
         <div class="toolbar-action-btns">
           <button class="tbar-btn undo" onclick="editorUndo()">
             <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>
@@ -2063,6 +2064,7 @@ function saveDOE(){
 /* ========== DOE DETAIL ========== */
 var detailIndex = -1;
 var fabricCanvas = null;
+var _canvasLoading = false; // bloquea autoSave durante carga async
 var editorTool = 'select';
 var editorColor = '#ffffff';
 var isDrawingShape = false;
@@ -2095,7 +2097,19 @@ function openDOE(idx){
   buildElementsPanel(d);
   buildResultadosGrid(d);
   document.getElementById('page-doe-detail').classList.add('active');
-  setTimeout(function(){ initFabricCanvas(d); }, 100);
+
+  // Si el mapa está finalizado, mostrar overlay directamente sin cargar canvas editable
+  var finalOverlay = document.getElementById('map-finalized');
+  var finalImg    = document.getElementById('map-finalized-img');
+  if(d.finalizado && d.mapFinal){
+    finalImg.src = d.mapFinal;
+    finalOverlay.classList.add('active');
+    // No iniciamos el canvas para evitar que autoSave corrompa otros DOEs
+  } else {
+    finalOverlay.classList.remove('active');
+    if(finalImg) finalImg.src='';
+    setTimeout(function(){ initFabricCanvas(d); }, 100);
+  }
 }
 
 function closeDOEDetail(){
@@ -2111,129 +2125,54 @@ function switchDetailTab(tab){
   document.getElementById('dtab-content-'+tab).classList.add('active');
 }
 
-/* ========== VEHICLE SVGs TOP-DOWN REALISTAS v14 ========== */
+/* ========== VEHICLE SVGs TOP-DOWN ========== */
 function getVehicleSVGDataURL(type, abbrev){
   abbrev = (abbrev||'').substring(0,3);
-  var fs = abbrev.length<=1?14:abbrev.length===2?11:9;
+  var fs = abbrev.length<=1?16:abbrev.length===2?12:10;
   var w, h, svgBody;
-  var defs='<defs><linearGradient id="gl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.12"/><stop offset="1" stop-color="#000" stop-opacity="0.1"/></linearGradient></defs>';
-
   if(type==='furgon'){
-    w=56; h=100;
-    svgBody=
-      '<ellipse cx="28" cy="97" rx="22" ry="3" fill="rgba(0,0,0,0.3"/>'+
-      '<rect x="1" y="10" width="9" height="16" rx="3" fill="#060810"/>'+
-      '<rect x="46" y="10" width="9" height="16" rx="3" fill="#060810"/>'+
-      '<rect x="1" y="72" width="9" height="16" rx="3" fill="#060810"/>'+
-      '<rect x="46" y="72" width="9" height="16" rx="3" fill="#060810"/>'+
-      '<rect x="2" y="12" width="6" height="12" rx="2" fill="#181828"/>'+
-      '<rect x="48" y="12" width="6" height="12" rx="2" fill="#181828"/>'+
-      '<rect x="2" y="74" width="6" height="12" rx="2" fill="#181828"/>'+
-      '<rect x="48" y="74" width="6" height="12" rx="2" fill="#181828"/>'+
-      '<rect x="6" y="4" width="44" height="92" rx="8" fill="#0b2359"/>'+
-      '<rect x="6" y="4" width="44" height="92" rx="8" fill="url(#gl)" opacity="0.6"/>'+
-      '<rect x="44" y="6" width="4" height="88" rx="2" fill="white" opacity="0.05"/>'+
-      '<rect x="6" y="43" width="44" height="4" fill="white" opacity="0.22"/>'+
-      '<rect x="6" y="47" width="44" height="4" fill="#1e5ed4" opacity="0.55"/>'+
-      '<rect x="11" y="8" width="34" height="19" rx="4" fill="#122d5a"/>'+
-      '<rect x="13" y="10" width="30" height="15" rx="3" fill="#1a3d72"/>'+
-      '<rect x="13" y="10" width="14" height="15" rx="3" fill="rgba(255,255,255,0.06"/>'+
-      '<rect x="12" y="5" width="32" height="5" rx="2" fill="#10101e"/>'+
-      '<rect x="13" y="5.5" width="9" height="4" rx="1" fill="#cc1111"/>'+
-      '<rect x="23" y="5.5" width="10" height="4" rx="1" fill="#1144cc"/>'+
-      '<rect x="34" y="5.5" width="9" height="4" rx="1" fill="#cc1111"/>'+
-      '<rect x="11" y="74" width="34" height="18" rx="4" fill="#122d5a"/>'+
-      '<rect x="13" y="76" width="30" height="14" rx="3" fill="#1a3d72"/>'+
-      '<rect x="7" y="5" width="5" height="7" rx="1.5" fill="#d8eeff" opacity="0.95"/>'+
-      '<rect x="44" y="5" width="5" height="7" rx="1.5" fill="#d8eeff" opacity="0.95"/>'+
-      '<rect x="7" y="88" width="5" height="7" rx="1.5" fill="#cc2200" opacity="0.9"/>'+
-      '<rect x="44" y="88" width="5" height="7" rx="1.5" fill="#cc2200" opacity="0.9"/>'+
-      '<rect x="2" y="22" width="5" height="3" rx="1" fill="#0a1840"/>'+
-      '<rect x="49" y="22" width="5" height="3" rx="1" fill="#0a1840"/>'+
-      (abbrev?'<rect x="13" y="53" width="30" height="17" rx="3" fill="rgba(0,0,40,0.5"/>'+
-      '<text x="28" y="62" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-weight="900" font-size="'+fs+'" fill="white" letter-spacing="1">'+abbrev+'</text>':'');
-
+    w=52; h=92;
+    svgBody='<rect x="4" y="2" width="44" height="88" rx="9" fill="#0d2a5a"/>'
+      +'<rect x="4" y="2" width="44" height="88" rx="9" fill="url(#metallic)" opacity="0.15"/>'
+      +'<rect x="9" y="7" width="34" height="22" rx="4" fill="#1a4a9a" opacity="0.8"/>'
+      +'<rect x="10" y="63" width="32" height="18" rx="3" fill="#1a4a9a" opacity="0.65"/>'
+      +'<rect x="4" y="40" width="44" height="3" fill="#4477cc" opacity="0.5"/>'
+      +'<rect x="4" y="47" width="44" height="3" fill="#4477cc" opacity="0.5"/>'
+      +'<rect x="0" y="12" width="8" height="16" rx="2" fill="#0a0a1a"/>'
+      +'<rect x="44" y="12" width="8" height="16" rx="2" fill="#0a0a1a"/>'
+      +'<rect x="0" y="64" width="8" height="16" rx="2" fill="#0a0a1a"/>'
+      +'<rect x="44" y="64" width="8" height="16" rx="2" fill="#0a0a1a"/>'
+      +(abbrev?'<text x="26" y="48" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-weight="bold" font-size="16" fill="white">'+abbrev+'</text>':'');
   } else if(type==='van'){
-    w=50; h=84;
-    svgBody=
-      '<ellipse cx="25" cy="81" rx="19" ry="3" fill="rgba(0,0,0,0.3"/>'+
-      '<rect x="1" y="9" width="8" height="14" rx="3" fill="#060810"/>'+
-      '<rect x="41" y="9" width="8" height="14" rx="3" fill="#060810"/>'+
-      '<rect x="1" y="60" width="8" height="14" rx="3" fill="#060810"/>'+
-      '<rect x="41" y="60" width="8" height="14" rx="3" fill="#060810"/>'+
-      '<rect x="2" y="11" width="5" height="10" rx="1.5" fill="#181828"/>'+
-      '<rect x="43" y="11" width="5" height="10" rx="1.5" fill="#181828"/>'+
-      '<rect x="2" y="62" width="5" height="10" rx="1.5" fill="#181828"/>'+
-      '<rect x="43" y="62" width="5" height="10" rx="1.5" fill="#181828"/>'+
-      '<rect x="7" y="5" width="36" height="74" rx="9" fill="#0b2359"/>'+
-      '<rect x="7" y="5" width="36" height="74" rx="9" fill="url(#gl)" opacity="0.6"/>'+
-      '<rect x="37" y="7" width="4" height="70" rx="2" fill="white" opacity="0.05"/>'+
-      '<rect x="7" y="36" width="36" height="4" fill="white" opacity="0.22"/>'+
-      '<rect x="7" y="40" width="36" height="4" fill="#1e5ed4" opacity="0.55"/>'+
-      '<rect x="11" y="9" width="28" height="16" rx="4" fill="#122d5a"/>'+
-      '<rect x="13" y="11" width="24" height="12" rx="3" fill="#1a3d72"/>'+
-      '<rect x="13" y="11" width="11" height="12" rx="3" fill="rgba(255,255,255,0.06"/>'+
-      '<rect x="13" y="6" width="24" height="4" rx="2" fill="#10101e"/>'+
-      '<rect x="14" y="6.5" width="6" height="3" rx="1" fill="#cc1111"/>'+
-      '<rect x="21" y="6.5" width="8" height="3" rx="1" fill="#1144cc"/>'+
-      '<rect x="30" y="6.5" width="6" height="3" rx="1" fill="#cc1111"/>'+
-      '<rect x="11" y="60" width="28" height="15" rx="4" fill="#122d5a"/>'+
-      '<rect x="13" y="62" width="24" height="11" rx="3" fill="#1a3d72"/>'+
-      '<ellipse cx="10" cy="10" rx="3" ry="2.5" fill="#d8eeff" opacity="0.9"/>'+
-      '<ellipse cx="40" cy="10" rx="3" ry="2.5" fill="#d8eeff" opacity="0.9"/>'+
-      '<ellipse cx="10" cy="74" rx="3" ry="2.5" fill="#cc2200" opacity="0.9"/>'+
-      '<ellipse cx="40" cy="74" rx="3" ry="2.5" fill="#cc2200" opacity="0.9"/>'+
-      '<rect x="2" y="17" width="4" height="3" rx="1" fill="#0a1840"/>'+
-      '<rect x="44" y="17" width="4" height="3" rx="1" fill="#0a1840"/>'+
-      (abbrev?'<rect x="12" y="43" width="26" height="14" rx="3" fill="rgba(0,0,40,0.5"/>'+
-      '<text x="25" y="50" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-weight="900" font-size="'+fs+'" fill="white" letter-spacing="1">'+abbrev+'</text>':'');
-
-  } else {
-    // Todo Terreno — mas ancho, ruedas off-road grandes, snorkel
-    w=62; h=86;
-    svgBody=
-      '<ellipse cx="31" cy="83" rx="27" ry="3" fill="rgba(0,0,0,0.35"/>'+
-      '<rect x="0" y="8" width="11" height="19" rx="4" fill="#060810"/>'+
-      '<rect x="51" y="8" width="11" height="19" rx="4" fill="#060810"/>'+
-      '<rect x="0" y="58" width="11" height="19" rx="4" fill="#060810"/>'+
-      '<rect x="51" y="58" width="11" height="19" rx="4" fill="#060810"/>'+
-      '<rect x="1" y="10" width="8" height="15" rx="3" fill="#181828"/>'+
-      '<circle cx="5" cy="17" r="3" fill="#22222e"/>'+
-      '<rect x="53" y="10" width="8" height="15" rx="3" fill="#181828"/>'+
-      '<circle cx="57" cy="17" r="3" fill="#22222e"/>'+
-      '<rect x="1" y="60" width="8" height="15" rx="3" fill="#181828"/>'+
-      '<circle cx="5" cy="67" r="3" fill="#22222e"/>'+
-      '<rect x="53" y="60" width="8" height="15" rx="3" fill="#181828"/>'+
-      '<circle cx="57" cy="67" r="3" fill="#22222e"/>'+
-      '<rect x="9" y="5" width="44" height="76" rx="8" fill="#0b2359"/>'+
-      '<rect x="9" y="5" width="44" height="76" rx="8" fill="url(#gl)" opacity="0.6"/>'+
-      '<rect x="47" y="7" width="4" height="72" rx="2" fill="white" opacity="0.05"/>'+
-      '<rect x="9" y="37" width="44" height="4" fill="white" opacity="0.22"/>'+
-      '<rect x="9" y="41" width="44" height="4" fill="#1e5ed4" opacity="0.55"/>'+
-      '<rect x="14" y="9" width="34" height="16" rx="4" fill="#122d5a"/>'+
-      '<rect x="16" y="11" width="30" height="12" rx="3" fill="#1a3d72"/>'+
-      '<rect x="16" y="11" width="14" height="12" rx="3" fill="rgba(255,255,255,0.06"/>'+
-      '<rect x="15" y="5" width="32" height="5" rx="2" fill="#10101e"/>'+
-      '<rect x="16" y="5.5" width="9" height="4" rx="1" fill="#cc1111"/>'+
-      '<rect x="26.5" y="5.5" width="9" height="4" rx="1" fill="#1144cc"/>'+
-      '<rect x="37" y="5.5" width="9" height="4" rx="1" fill="#cc1111"/>'+
-      '<rect x="53" y="6" width="3" height="22" rx="1.5" fill="#080f20"/>'+
-      '<rect x="54" y="5" width="2" height="5" rx="1" fill="#0d1e40"/>'+
-      '<rect x="14" y="61" width="34" height="15" rx="4" fill="#122d5a"/>'+
-      '<rect x="16" y="63" width="30" height="11" rx="3" fill="#1a3d72"/>'+
-      '<rect x="10" y="6" width="6" height="6" rx="1.5" fill="#d8eeff" opacity="0.9"/>'+
-      '<rect x="46" y="6" width="6" height="6" rx="1.5" fill="#d8eeff" opacity="0.9"/>'+
-      '<rect x="10" y="13" width="4" height="3" rx="1" fill="#ff9900" opacity="0.85"/>'+
-      '<rect x="48" y="13" width="4" height="3" rx="1" fill="#ff9900" opacity="0.85"/>'+
-      '<rect x="10" y="71" width="6" height="7" rx="1.5" fill="#cc2200" opacity="0.9"/>'+
-      '<rect x="46" y="71" width="6" height="7" rx="1.5" fill="#cc2200" opacity="0.9"/>'+
-      '<rect x="1" y="20" width="7" height="4" rx="1.5" fill="#0a1840"/>'+
-      '<rect x="54" y="20" width="7" height="4" rx="1.5" fill="#0a1840"/>'+
-      (abbrev?'<rect x="15" y="44" width="32" height="15" rx="3" fill="rgba(0,0,40,0.5"/>'+
-      '<text x="31" y="52" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-weight="900" font-size="'+fs+'" fill="white" letter-spacing="1">'+abbrev+'</text>':'');
+    w=48; h=76;
+    svgBody='<rect x="4" y="2" width="40" height="72" rx="10" fill="#0d2a5a"/>'
+      +'<rect x="4" y="2" width="40" height="72" rx="10" fill="url(#metallic)" opacity="0.15"/>'
+      +'<rect x="9" y="7" width="30" height="18" rx="4" fill="#1a4a9a" opacity="0.8"/>'
+      +'<rect x="10" y="50" width="28" height="16" rx="3" fill="#1a4a9a" opacity="0.65"/>'
+      +'<rect x="4" y="33" width="40" height="3" fill="#4477cc" opacity="0.5"/>'
+      +'<rect x="4" y="39" width="40" height="3" fill="#4477cc" opacity="0.5"/>'
+      +'<rect x="0" y="10" width="8" height="14" rx="2" fill="#0a0a1a"/>'
+      +'<rect x="40" y="10" width="8" height="14" rx="2" fill="#0a0a1a"/>'
+      +'<rect x="0" y="52" width="8" height="14" rx="2" fill="#0a0a1a"/>'
+      +'<rect x="40" y="52" width="8" height="14" rx="2" fill="#0a0a1a"/>'
+      +(abbrev?'<text x="24" y="37" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-weight="bold" font-size="15" fill="white">'+abbrev+'</text>':'');
+  } else { // todo terreno
+    w=52; h=80;
+    svgBody='<rect x="3" y="2" width="46" height="76" rx="8" fill="#0d2a5a"/>'
+      +'<rect x="3" y="2" width="46" height="76" rx="8" fill="url(#metallic)" opacity="0.15"/>'
+      +'<rect x="9" y="7" width="34" height="20" rx="3" fill="#1a4a9a" opacity="0.8"/>'
+      +'<rect x="10" y="54" width="32" height="16" rx="3" fill="#1a4a9a" opacity="0.65"/>'
+      +'<rect x="3" y="35" width="46" height="3" fill="#4477cc" opacity="0.5"/>'
+      +'<rect x="3" y="41" width="46" height="3" fill="#4477cc" opacity="0.5"/>'
+      +'<rect x="0" y="11" width="8" height="16" rx="2" fill="#0a0a1a"/><rect x="2" y="14" width="4" height="10" rx="1" fill="#222"/>'
+      +'<rect x="44" y="11" width="8" height="16" rx="2" fill="#0a0a1a"/><rect x="46" y="14" width="4" height="10" rx="1" fill="#222"/>'
+      +'<rect x="0" y="53" width="8" height="16" rx="2" fill="#0a0a1a"/><rect x="2" y="56" width="4" height="10" rx="1" fill="#222"/>'
+      +'<rect x="44" y="53" width="8" height="16" rx="2" fill="#0a0a1a"/><rect x="46" y="56" width="4" height="10" rx="1" fill="#222"/>'
+      +(abbrev?'<text x="26" y="39" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-weight="bold" font-size="15" fill="white">'+abbrev+'</text>':'');
   }
-
-  var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+w+' '+h+'" width="'+w+'" height="'+h+'">'+defs+svgBody+'</svg>';
+  var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+w+' '+h+'" width="'+w+'" height="'+h+'">'
+    +'<defs><linearGradient id="metallic" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0.2"/><stop offset="0.5" stop-color="#fff" stop-opacity="0.05"/><stop offset="1" stop-color="#000" stop-opacity="0.1"/></linearGradient></defs>'
+    +svgBody+'</svg>';
   return 'data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(svg)));
 }
 
@@ -2511,6 +2450,7 @@ function initFabricCanvas(d){
   var wrap = document.getElementById('editor-wrap');
   var canvasEl = document.getElementById('editor-canvas');
   if(!canvasEl) return;
+  _canvasLoading = true; // previene autoSave durante carga async
 
   // Size canvas to wrap
   var W = wrap.clientWidth;
@@ -2550,10 +2490,12 @@ function initFabricCanvas(d){
           fabricCanvas.getObjects().forEach(function(o){
             if(o.id==='_bg_map'){ o.selectable=false; o.evented=false; }
           });
+          _canvasLoading = false;
           fabricCanvas.renderAll();
           saveToHistory();
         });
       } else {
+        _canvasLoading = false;
         fabricCanvas.renderAll();
         saveToHistory();
       }
@@ -2562,9 +2504,12 @@ function initFabricCanvas(d){
     noMap.classList.remove('hidden');
     if(d.canvasJSON){
       fabricCanvas.loadFromJSON(d.canvasJSON, function(){
+        _canvasLoading = false;
         fabricCanvas.renderAll();
         saveToHistory();
       });
+    } else {
+      _canvasLoading = false;
     }
   }
 
@@ -2836,7 +2781,7 @@ function editorClear(){
 
 /* ===== AUTO SAVE CANVAS ===== */
 function autoSaveCanvas(){
-  if(!fabricCanvas||detailIndex<0) return;
+  if(!fabricCanvas||detailIndex<0||_canvasLoading) return;
   var data = loadDB();
   if(!data[detailIndex]) return;
   data[detailIndex].canvasJSON = fabricCanvas.toJSON(['id','selectable','evented']);
@@ -2863,7 +2808,28 @@ function finalizeMap(){
 }
 
 function unfinalizeMap(){
+  // Quita el overlay y carga el canvas editable
   document.getElementById('map-finalized').classList.remove('active');
+  var data = loadDB();
+  if(detailIndex>=0 && data[detailIndex]){
+    setTimeout(function(){ initFabricCanvas(data[detailIndex]); }, 100);
+  }
+}
+
+function deleteMap(){
+  if(!confirm('¿Borrar el mapa de este DOE? Esta acción no se puede deshacer.')) return;
+  var data = loadDB();
+  if(detailIndex<0||!data[detailIndex]) return;
+  data[detailIndex].mapa      = null;
+  data[detailIndex].mapFinal  = null;
+  data[detailIndex].canvasJSON= null;
+  data[detailIndex].finalizado= false;
+  saveDB(data);
+  document.getElementById('map-finalized').classList.remove('active');
+  if(document.getElementById('map-finalized-img')) document.getElementById('map-finalized-img').src='';
+  setTimeout(function(){ initFabricCanvas(data[detailIndex]); }, 80);
+  renderDOEList();
+  showToast('Mapa eliminado','🗑️');
 }
 
 /* ===== RESULTADOS ===== */
@@ -2899,9 +2865,9 @@ function saveResultados(){
 }
 
 /* ===== EXPORT DOE PDF ===== */
-function exportDOEPDF(){
+function exportDOEPDF(blobOnly){
   var data = loadDB();
-  if(detailIndex<0||!data[detailIndex]) return;
+  if(detailIndex<0||!data[detailIndex]) return null;
   var d = data[detailIndex];
   var {jsPDF} = window.jspdf;
   var doc = new jsPDF({unit:'mm', format:'a4'});
@@ -3038,8 +3004,12 @@ function exportDOEPDF(){
     doc.text('Pág. '+p+'/'+pages,196,290,'right');
   }
 
+  if(blobOnly){
+    return new File([doc.output('arraybuffer')],'DOE-'+(d.fecha||'doe')+'.pdf',{type:'application/pdf'});
+  }
   doc.save('DOE-'+(d.lugar||'dispositivo').replace(/[^a-zA-Z0-9]/g,'-')+'-'+d.fecha+'.pdf');
   showToast('PDF generado','📄');
+  return null;
 }
 
 
@@ -3269,6 +3239,14 @@ function renderStats(){
 }
 
 /* ========== STATS PDF (MEJORADO) ========== */
+function hexToRgb(hex){
+  var r=hex.replace('#','');
+  if(r.length===3) r=r[0]+r[0]+r[1]+r[1]+r[2]+r[2];
+  var n=parseInt(r,16);
+  if(isNaN(n)) return null;
+  return [(n>>16)&255,(n>>8)&255,n&255];
+}
+
 function exportStatsPDF(){
   var does = filterDOEs(currentStatsFilter);
   var totals = aggregateStats(does);
@@ -3358,11 +3336,15 @@ function exportStatsPDF(){
   STATS_KEYS.forEach(function(k,i){
     // Alternating rows
     if(i%2===0){ doc.setFillColor(245,248,252); doc.rect(margin,y-4,pw,7,'F'); }
+    // Color dot matching chart
+    var rgb = hexToRgb(k.color);
+    if(rgb){ doc.setFillColor(rgb[0],rgb[1],rgb[2]); doc.circle(margin+2.5, y-1, 2, 'F'); }
     doc.setFont('helvetica','normal'); doc.setFontSize(9);
     doc.setTextColor(40,40,60);
-    doc.text(k.label, margin+2, y);
+    doc.text(k.label, margin+7, y);
     doc.setFont('helvetica','bold');
-    doc.setTextColor(26,111,196);
+    var valColor = hexToRgb(k.color)||[26,111,196];
+    doc.setTextColor(valColor[0],valColor[1],valColor[2]);
     doc.text(''+totals[k.id], 210-margin-2, y, {align:'right'});
     doc.setTextColor(40,40,60);
     y+=7;
@@ -3416,35 +3398,37 @@ function shareViaEmail(){
 
 /* ========== SHARE DOE PDF ========== */
 async function shareDOEPDF(){
-  // Generate the PDF blob, then share natively or fallback
   var data=loadDB();
   if(detailIndex<0||!data[detailIndex]) return;
   var d=data[detailIndex];
-  var shareText = 'DOE · '+(d.fecha||'')+' · '+(d.lugar||'')+' · '+((d.indicativos||[]).join(', ')||'');
+  var fileName='DOE-'+(d.fecha||'doe')+'.pdf';
+  var title='DOE · '+(d.lugar||'Dispositivo');
 
-  // Try Web Share API first (native share sheet → WhatsApp, Telegram, etc.)
+  // Generar PDF completo como File
+  var pdfFile = exportDOEPDF(true);
+  if(!pdfFile){ showToast('Error al generar PDF','⚠️'); return; }
+
+  // Intentar Web Share API con archivo (abre carrusel nativo de apps)
   if(navigator.share){
     try{
-      // Generate PDF as blob
-      var pdfBlob = generateDOEPDFBlob(d);
-      if(pdfBlob && navigator.canShare && navigator.canShare({files:[pdfBlob]})){
-        await navigator.share({
-          title:'DOE · '+(d.lugar||'Dispositivo'),
-          text: shareText,
-          files:[pdfBlob]
-        });
-        return;
-      } else {
-        // Share without file
-        await navigator.share({title:'DOE · '+(d.lugar||'Dispositivo'), text:shareText});
+      var canShareFile = navigator.canShare && navigator.canShare({files:[pdfFile]});
+      if(canShareFile){
+        await navigator.share({ title:title, files:[pdfFile] });
         return;
       }
+      // Share sin archivo (solo texto)
+      await navigator.share({ title:title, text:title });
+      return;
     }catch(e){
-      if(e.name!=='AbortError') showShareOptions(shareText);
+      if(e.name==='AbortError') return;
+      // Si falla, caer en descarga
     }
-  } else {
-    showShareOptions(shareText);
   }
+  // Fallback: descarga + toast
+  var url=URL.createObjectURL(pdfFile);
+  var a=document.createElement('a'); a.href=url; a.download=fileName; a.click();
+  setTimeout(function(){ URL.revokeObjectURL(url); },3000);
+  showToast('PDF descargado — compártelo desde tus archivos','📤');
 }
 
 function showShareOptions(shareText){
@@ -3652,9 +3636,13 @@ function checkPendingResultados(){
   });
   if(!pending.length) return;
 
-  var msg = pending.length === 1
-    ? '1 DOE finalizado sin resultados registrados'
-    : pending.length+' DOEs finalizados sin resultados registrados';
+  var msg;
+  if(pending.length === 1){
+    var p0 = pending[0];
+    msg = 'Sin resultados: '+( p0.lugar ? p0.lugar.substring(0,40)+(p0.lugar.length>40?'…':'') : 'DOE '+p0.fecha);
+  } else {
+    msg = pending.length+' DOEs finalizados sin resultados — '+pending.map(function(p){ return p.lugar ? p.lugar.substring(0,20)+(p.lugar.length>20?'…':'') : p.fecha; }).join(', ');
+  }
 
   // Show in-app notification banner
   showPendingBanner(msg, pending.length);
