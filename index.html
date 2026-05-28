@@ -773,6 +773,10 @@ textarea.form-input{resize:vertical;min-height:70px}
 }
 .toolbar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .toolbar-row:last-child{margin-bottom:0}
+.toolbar-section{display:flex;flex-direction:column;gap:5px;margin-bottom:8px}
+.toolbar-section-label{font-size:.6rem;font-weight:700;letter-spacing:1.5px;color:var(--text-dim);font-family:var(--font-mono);text-transform:uppercase;line-height:1}
+.toolbar-tools-row{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}
+.toolbar-tools-row .tool-btns{display:flex;gap:6px;flex-wrap:wrap;flex:1}
 .toolbar-label{
   font-size:.6rem;font-weight:700;letter-spacing:1.5px;color:var(--text-dim);
   font-family:var(--font-mono);text-transform:uppercase;flex-shrink:0;width:52px;
@@ -869,8 +873,9 @@ textarea.form-input{resize:vertical;min-height:70px}
 .map-finalized-img{flex:1;object-fit:contain;width:100%}
 .map-finalized-actions{
   padding:10px 12px;padding-bottom:max(10px,env(safe-area-inset-bottom));
-  display:flex;gap:8px;background:var(--bg-secondary);border-top:1px solid var(--border);
+  display:flex;flex-wrap:wrap;gap:8px;background:var(--bg-secondary);border-top:1px solid var(--border);
 }
+.map-finalized-actions .btn{flex:1;min-width:calc(50% - 4px)}
 
 /* ===== RESULTADOS ===== */
 .resultados-scroll{flex:1;overflow-y:auto;padding:14px}
@@ -1481,37 +1486,39 @@ textarea.form-input{resize:vertical;min-height:70px}
 
     <!-- Floating toolbar -->
     <div class="editor-toolbar">
-      <div class="toolbar-row">
-        <span class="toolbar-label">Herramienta</span>
-        <div class="tool-btns">
-          <button class="tool-btn active" id="tool-select" onclick="setTool('select')">
-            <svg viewBox="0 0 24 24"><path d="M4 0l16 12.279-6.951 1.17 4.325 8.817-3.596 1.734-4.35-8.879-5.428 4.702z"/></svg>Mover
-          </button>
-          <button class="tool-btn" id="tool-arrow" onclick="setTool('arrow')">
-            <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>Flecha
-          </button>
-          <button class="tool-btn" id="tool-rect" onclick="setTool('rect')">
-            <svg viewBox="0 0 24 24"><path d="M3 5v14h18V5H3zm16 12H5V7h14v10z"/></svg>Cuadro
-          </button>
-          <button class="tool-btn" id="tool-circle" onclick="setTool('circle')">
-            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/></svg>Círculo
-          </button>
-          <button class="tool-btn" id="tool-text" onclick="setTool('text')">
-            <svg viewBox="0 0 24 24"><path d="M5 4v3h5.5v12h3V7H19V4z"/></svg>Texto
-          </button>
-        </div>
-        <div class="toolbar-action-btns">
-          <button class="tbar-btn undo" onclick="editorUndo()">
-            <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>
-            Deshacer
-          </button>
-          <button class="tbar-btn clear" onclick="editorClear()">
-            <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-            Limpiar
-          </button>
-          <button class="tbar-btn finish" onclick="finalizeMap()">
-            <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:white"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>Finalizar
-          </button>
+      <div class="toolbar-section">
+        <div class="toolbar-section-label">Herramienta</div>
+        <div class="toolbar-tools-row">
+          <div class="tool-btns">
+            <button class="tool-btn active" id="tool-select" onclick="setTool('select')">
+              <svg viewBox="0 0 24 24"><path d="M4 0l16 12.279-6.951 1.17 4.325 8.817-3.596 1.734-4.35-8.879-5.428 4.702z"/></svg>Mover
+            </button>
+            <button class="tool-btn" id="tool-arrow" onclick="setTool('arrow')">
+              <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>Flecha
+            </button>
+            <button class="tool-btn" id="tool-rect" onclick="setTool('rect')">
+              <svg viewBox="0 0 24 24"><path d="M3 5v14h18V5H3zm16 12H5V7h14v10z"/></svg>Cuadro
+            </button>
+            <button class="tool-btn" id="tool-circle" onclick="setTool('circle')">
+              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/></svg>Círculo
+            </button>
+            <button class="tool-btn" id="tool-text" onclick="setTool('text')">
+              <svg viewBox="0 0 24 24"><path d="M5 4v3h5.5v12h3V7H19V4z"/></svg>Texto
+            </button>
+          </div>
+          <div class="toolbar-action-btns">
+            <button class="tbar-btn undo" onclick="editorUndo()">
+              <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>
+              Deshacer
+            </button>
+            <button class="tbar-btn clear" onclick="editorClear()">
+              <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+              Limpiar
+            </button>
+            <button class="tbar-btn finish" onclick="finalizeMap()">
+              <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:white"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>Finalizar
+            </button>
+          </div>
         </div>
       </div>
       <div class="toolbar-row">
@@ -2064,7 +2071,7 @@ function saveDOE(){
 /* ========== DOE DETAIL ========== */
 var detailIndex = -1;
 var fabricCanvas = null;
-var _canvasLoading = false; // bloquea autoSave durante carga async
+var _canvasLoading = false;
 var editorTool = 'select';
 var editorColor = '#ffffff';
 var isDrawingShape = false;
@@ -2097,14 +2104,11 @@ function openDOE(idx){
   buildElementsPanel(d);
   buildResultadosGrid(d);
   document.getElementById('page-doe-detail').classList.add('active');
-
-  // Si el mapa está finalizado, mostrar overlay directamente sin cargar canvas editable
-  var finalOverlay = document.getElementById('map-finalized');
-  var finalImg    = document.getElementById('map-finalized-img');
-  if(d.finalizado && d.mapFinal){
-    finalImg.src = d.mapFinal;
+  var finalOverlay=document.getElementById('map-finalized');
+  var finalImg=document.getElementById('map-finalized-img');
+  if(d.finalizado&&d.mapFinal){
+    finalImg.src=d.mapFinal;
     finalOverlay.classList.add('active');
-    // No iniciamos el canvas para evitar que autoSave corrompa otros DOEs
   } else {
     finalOverlay.classList.remove('active');
     if(finalImg) finalImg.src='';
@@ -2450,7 +2454,7 @@ function initFabricCanvas(d){
   var wrap = document.getElementById('editor-wrap');
   var canvasEl = document.getElementById('editor-canvas');
   if(!canvasEl) return;
-  _canvasLoading = true; // previene autoSave durante carga async
+  _canvasLoading = true;
 
   // Size canvas to wrap
   var W = wrap.clientWidth;
@@ -2808,26 +2812,26 @@ function finalizeMap(){
 }
 
 function unfinalizeMap(){
-  // Quita el overlay y carga el canvas editable
   document.getElementById('map-finalized').classList.remove('active');
-  var data = loadDB();
-  if(detailIndex>=0 && data[detailIndex]){
-    setTimeout(function(){ initFabricCanvas(data[detailIndex]); }, 100);
+  var data=loadDB();
+  if(detailIndex>=0&&data[detailIndex]){
+    setTimeout(function(){ initFabricCanvas(data[detailIndex]); },100);
   }
 }
 
 function deleteMap(){
-  if(!confirm('¿Borrar el mapa de este DOE? Esta acción no se puede deshacer.')) return;
-  var data = loadDB();
+  if(!confirm('¿Borrar el mapa de este DOE? No se puede deshacer.')) return;
+  var data=loadDB();
   if(detailIndex<0||!data[detailIndex]) return;
-  data[detailIndex].mapa      = null;
-  data[detailIndex].mapFinal  = null;
-  data[detailIndex].canvasJSON= null;
-  data[detailIndex].finalizado= false;
+  data[detailIndex].mapa=null;
+  data[detailIndex].mapFinal=null;
+  data[detailIndex].canvasJSON=null;
+  data[detailIndex].finalizado=false;
   saveDB(data);
   document.getElementById('map-finalized').classList.remove('active');
-  if(document.getElementById('map-finalized-img')) document.getElementById('map-finalized-img').src='';
-  setTimeout(function(){ initFabricCanvas(data[detailIndex]); }, 80);
+  var fi=document.getElementById('map-finalized-img');
+  if(fi) fi.src='';
+  setTimeout(function(){ initFabricCanvas(data[detailIndex]); },80);
   renderDOEList();
   showToast('Mapa eliminado','🗑️');
 }
@@ -3334,17 +3338,15 @@ function exportStatsPDF(){
   doc.setDrawColor(26,111,196); doc.line(margin,y,210-margin,y); y+=5;
 
   STATS_KEYS.forEach(function(k,i){
-    // Alternating rows
     if(i%2===0){ doc.setFillColor(245,248,252); doc.rect(margin,y-4,pw,7,'F'); }
-    // Color dot matching chart
     var rgb = hexToRgb(k.color);
-    if(rgb){ doc.setFillColor(rgb[0],rgb[1],rgb[2]); doc.circle(margin+2.5, y-1, 2, 'F'); }
+    if(rgb){ doc.setFillColor(rgb[0],rgb[1],rgb[2]); doc.circle(margin+2.5,y-1,2,'F'); }
     doc.setFont('helvetica','normal'); doc.setFontSize(9);
     doc.setTextColor(40,40,60);
     doc.text(k.label, margin+7, y);
     doc.setFont('helvetica','bold');
-    var valColor = hexToRgb(k.color)||[26,111,196];
-    doc.setTextColor(valColor[0],valColor[1],valColor[2]);
+    var vc=hexToRgb(k.color)||[26,111,196];
+    doc.setTextColor(vc[0],vc[1],vc[2]);
     doc.text(''+totals[k.id], 210-margin-2, y, {align:'right'});
     doc.setTextColor(40,40,60);
     y+=7;
@@ -3401,34 +3403,25 @@ async function shareDOEPDF(){
   var data=loadDB();
   if(detailIndex<0||!data[detailIndex]) return;
   var d=data[detailIndex];
-  var fileName='DOE-'+(d.fecha||'doe')+'.pdf';
   var title='DOE · '+(d.lugar||'Dispositivo');
-
-  // Generar PDF completo como File
-  var pdfFile = exportDOEPDF(true);
-  if(!pdfFile){ showToast('Error al generar PDF','⚠️'); return; }
-
-  // Intentar Web Share API con archivo (abre carrusel nativo de apps)
+  var pdfFile=exportDOEPDF(true);
+  if(!pdfFile){showToast('Error al generar PDF','⚠️');return;}
   if(navigator.share){
     try{
-      var canShareFile = navigator.canShare && navigator.canShare({files:[pdfFile]});
-      if(canShareFile){
-        await navigator.share({ title:title, files:[pdfFile] });
+      if(navigator.canShare&&navigator.canShare({files:[pdfFile]})){
+        await navigator.share({title:title,files:[pdfFile]});
         return;
       }
-      // Share sin archivo (solo texto)
-      await navigator.share({ title:title, text:title });
+      await navigator.share({title:title,text:title});
       return;
     }catch(e){
       if(e.name==='AbortError') return;
-      // Si falla, caer en descarga
     }
   }
-  // Fallback: descarga + toast
   var url=URL.createObjectURL(pdfFile);
-  var a=document.createElement('a'); a.href=url; a.download=fileName; a.click();
-  setTimeout(function(){ URL.revokeObjectURL(url); },3000);
-  showToast('PDF descargado — compártelo desde tus archivos','📤');
+  var a=document.createElement('a');a.href=url;a.download=pdfFile.name;a.click();
+  setTimeout(function(){URL.revokeObjectURL(url);},3000);
+  showToast('PDF descargado — compártelo desde archivos','📤');
 }
 
 function showShareOptions(shareText){
@@ -3639,9 +3632,9 @@ function checkPendingResultados(){
   var msg;
   if(pending.length === 1){
     var p0 = pending[0];
-    msg = 'Sin resultados: '+( p0.lugar ? p0.lugar.substring(0,40)+(p0.lugar.length>40?'…':'') : 'DOE '+p0.fecha);
+    msg = 'Sin resultados: '+(p0.lugar ? p0.lugar.substring(0,40)+(p0.lugar.length>40?'\u2026':'') : 'DOE '+p0.fecha);
   } else {
-    msg = pending.length+' DOEs finalizados sin resultados — '+pending.map(function(p){ return p.lugar ? p.lugar.substring(0,20)+(p.lugar.length>20?'…':'') : p.fecha; }).join(', ');
+    msg = pending.length+' DOEs sin resultados — '+pending.map(function(p){ return p.lugar ? p.lugar.substring(0,20)+(p.lugar.length>20?'\u2026':'') : p.fecha; }).join(', ');
   }
 
   // Show in-app notification banner
