@@ -205,6 +205,22 @@ a{text-decoration:none;color:inherit}
 .fab:active{transform:scale(0.98)}
 .fab svg{width:20px;height:20px;fill:white}
 
+.doe-search-wrap{
+  position:relative;margin-bottom:10px;
+}
+.doe-search-wrap svg{
+  position:absolute;left:10px;top:50%;transform:translateY(-50%);
+  width:16px;height:16px;fill:var(--text-dim);pointer-events:none;
+}
+.doe-search-input{
+  width:100%;background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius-sm);color:var(--text-primary);
+  font-family:var(--font-mono);font-size:.78rem;
+  padding:9px 10px 9px 34px;
+  transition:border-color .2s;
+}
+.doe-search-input:focus{outline:none;border-color:var(--app-color);}
+.doe-search-input::placeholder{color:var(--text-dim);}
 .doe-list{display:flex;flex-direction:column;gap:10px}
 .doe-empty{
   text-align:center;padding:48px 20px;
@@ -749,7 +765,7 @@ textarea.form-input{resize:vertical;min-height:70px}
   transition:all .2s;cursor:pointer;
 }
 .detail-tab.active{color:var(--app-color);border-bottom-color:var(--app-color)}
-.detail-tab-content{display:none;flex:1;overflow:hidden;flex-direction:column}
+.detail-tab-content{display:none;flex:1;overflow:hidden;flex-direction:column;position:relative}
 .detail-tab-content.active{display:flex}
 
 /* ===== MAPA EDITOR ===== */
@@ -865,7 +881,7 @@ textarea.form-input{resize:vertical;min-height:70px}
 
 /* Finalized view */
 .map-finalized{
-  position:absolute;inset:0;z-index:15;
+  position:absolute;inset:0;z-index:25;
   background:var(--bg-primary);
   display:none;flex-direction:column;
 }
@@ -970,6 +986,10 @@ textarea.form-input{resize:vertical;min-height:70px}
       Añadir DOE
     </button>
     <div class="section-title">Dispositivos registrados</div>
+    <div class="doe-search-wrap">
+      <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      <input type="text" class="doe-search-input" id="doe-search" placeholder="Buscar por calle, lugar..." oninput="renderDOEList()">
+    </div>
     <div class="doe-list" id="doe-list">
       <!-- populated by JS -->
     </div>
@@ -1460,27 +1480,28 @@ textarea.form-input{resize:vertical;min-height:70px}
         </label>
       </div>
       <canvas id="editor-canvas"></canvas>
-      <!-- Finalized overlay -->
-      <div class="map-finalized" id="map-finalized">
-        <img id="map-finalized-img" class="map-finalized-img" alt="Mapa DOE finalizado">
-        <div class="map-finalized-actions">
-          <button class="btn btn-secondary" onclick="unfinalizeMap()" style="flex:1">
-            <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-            Re-editar
-          </button>
-          <button class="btn" onclick="deleteMap()" style="flex:1;background:var(--red);color:white;border:none">
-            <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:white"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-            Borrar mapa
-          </button>
-          <button class="btn btn-primary" onclick="exportDOEPDF()" style="flex:1">
-            <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg>
-            PDF
-          </button>
-          <button class="btn" style="flex:1;background:var(--green);color:white;border:none" onclick="shareDOEPDF()">
-            <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:white"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>
-            Enviar
-          </button>
-        </div>
+    </div>
+
+    <!-- Finalized overlay — fuera de editor-wrap para cubrir toolbar (z-index:25) -->
+    <div class="map-finalized" id="map-finalized">
+      <img id="map-finalized-img" class="map-finalized-img" alt="Mapa DOE finalizado">
+      <div class="map-finalized-actions">
+        <button class="btn btn-secondary" onclick="unfinalizeMap()" style="flex:1">
+          <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+          Re-editar
+        </button>
+        <button class="btn" onclick="deleteMap()" style="flex:1;background:var(--red);color:white;border:none">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:white"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+          Borrar mapa
+        </button>
+        <button class="btn btn-primary" onclick="exportDOEPDF()" style="flex:1">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg>
+          PDF
+        </button>
+        <button class="btn" style="flex:1;background:var(--green);color:white;border:none" onclick="shareDOEPDF()">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:white"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>
+          Enviar
+        </button>
       </div>
     </div>
 
@@ -1541,7 +1562,7 @@ textarea.form-input{resize:vertical;min-height:70px}
           <button class="tool-btn" onclick="editorZoomReset()" style="font-size:.7rem">1:1</button>
         </div>
         <div style="margin-left:auto;font-size:.6rem;color:var(--text-dim);font-family:var(--font-mono)">
-          Toca→mover<br>2×→borrar
+          Toca→mover<br>X→borrar
         </div>
       </div>
     </div>
@@ -1688,15 +1709,26 @@ function showToast(msg, icon){
 function renderDOEList(){
   var list = document.getElementById('doe-list');
   var data = loadDB();
+  // Filtrar por buscador si hay término
+  var searchEl = document.getElementById('doe-search');
+  var q = searchEl ? searchEl.value.toLowerCase().trim() : '';
+  if(q){
+    data = data.filter(function(d,i){
+      d._origIdx = i; // conservar índice original
+      return (d.lugar||'').toLowerCase().indexOf(q)>=0;
+    });
+  } else {
+    data = data.map(function(d,i){ d._origIdx = i; return d; });
+  }
   if(!data.length){
     list.innerHTML = '<div class="doe-empty"><div class="doe-empty-icon"><svg viewBox="0 0 24 24"><path d="M20 6h-2.18c.07-.44.18-.88.18-1.3 0-2.59-2.09-4.7-4.68-4.7C11.84 0 10.38.68 9.35 1.9L8 3.4 6.65 1.9C5.62.68 4.16 0 2.68 0 1.09 0 0 1.2 0 2.7c0 .42.09.86.18 1.3H0v14c0 1.1.9 2 2 2h20c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 14H2V8h18v12z"/></svg></div><h3>Sin DOEs registrados</h3><p>Pulsa "Añadir DOE" para crear<br>tu primer dispositivo operativo</p></div>';
     return;
   }
-  list.innerHTML = data.map(function(doe,i){
+  list.innerHTML = data.map(function(doe){
     var vTotal = (doe.vehiculos||[]).reduce(function(a,b){return a+(b.qty||0)},0);
     var status = doe.finalizado ? 'finalizado' : 'borrador';
     var statusLabel = doe.finalizado ? 'Finalizado' : 'Borrador';
-    return '<div class="doe-card" onclick="openDOE('+i+')">\
+    return '<div class="doe-card" onclick="openDOE('+doe._origIdx+')">\
       <div class="doe-card-stripe"></div>\
       <div class="doe-card-inner">\
         <div class="doe-card-badge">'+formatDateBadge(doe.fecha)+'</div>\
@@ -1710,15 +1742,15 @@ function renderDOEList(){
         <div class="doe-card-status '+status+'">'+statusLabel+'</div>\
       </div>\
       <div class="doe-card-actions">\
-        <button class="doe-action-btn edit" onclick="event.stopPropagation();editDOE('+i+')">\
+        <button class="doe-action-btn edit" onclick="event.stopPropagation();editDOE('+doe._origIdx+')">\
           <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>\
           Editar\
         </button>\
-        <button class="doe-action-btn view" onclick="event.stopPropagation();openDOE('+i+')">\
+        <button class="doe-action-btn view" onclick="event.stopPropagation();openDOE('+doe._origIdx+')">\
           <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>\
           Ver\
         </button>\
-        <button class="doe-action-btn del" onclick="event.stopPropagation();confirmDeleteDOE('+i+')">\
+        <button class="doe-action-btn del" onclick="event.stopPropagation();confirmDeleteDOE('+doe._origIdx+')">\
           <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>\
           Borrar\
         </button>\
@@ -1834,6 +1866,12 @@ function populateStep1(){
   document.getElementById('doe-lugar').value = currentDOE.lugar||'';
   document.getElementById('doe-agentes').value = currentDOE.agentes||0;
   document.getElementById('doe-mandos').value = currentDOE.mandos||0;
+  // Restaurar rangos de mandos al editar
+  var rangos = currentDOE.mandos_rangos||{};
+  document.getElementById('rank-oficial').value = rangos.oficial||0;
+  document.getElementById('rank-subinspector').value = rangos.subinspector||0;
+  document.getElementById('rank-inspector').value = rangos.inspector||0;
+  document.getElementById('rank-comisario').value = rangos.comisario||0;
   renderIndicativos();
   updateMandosPanel();
   if(typeof refreshWeaponUI==='function') setTimeout(refreshWeaponUI,0);
@@ -2546,6 +2584,44 @@ function initFabricCanvas(d){
   fabricCanvas.setWidth(W);
   fabricCanvas.setHeight(Math.max(H, 300));
 
+  // Control personalizado: botón X rojo para borrar objetos
+  fabric.Object.prototype.controls.deleteControl = new fabric.Control({
+    x: 0.5, y: -0.5,
+    offsetY: -14, offsetX: 14,
+    cursorStyle: 'pointer',
+    mouseUpHandler: function(eventData, transform){
+      var target = transform.target;
+      var canvas = target.canvas;
+      if(!canvas || target.id === '_bg_map') return false;
+      canvas.remove(target);
+      canvas.requestRenderAll();
+      saveToHistory();
+      autoSaveCanvas();
+      return true;
+    },
+    render: function(ctx, left, top, styleOverride, fabricObject){
+      var size = 20;
+      ctx.save();
+      ctx.translate(left, top);
+      ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
+      ctx.beginPath();
+      ctx.arc(0, 0, size/2, 0, 2*Math.PI);
+      ctx.fillStyle = '#ff4136';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = 2;
+      var d = 4.5;
+      ctx.moveTo(-d,-d); ctx.lineTo(d,d);
+      ctx.moveTo(d,-d);  ctx.lineTo(-d,d);
+      ctx.stroke();
+      ctx.restore();
+    }
+  });
+
   // No map placeholder
   var noMap = document.getElementById('canvas-no-map');
 
@@ -2872,8 +2948,14 @@ function finalizeMap(){
   if(!fabricCanvas) return;
   // Deselect all
   fabricCanvas.discardActiveObject();
+  // Reset zoom/pan para capturar el canvas completo sin recortes
+  var savedVpt = fabricCanvas.viewportTransform.slice();
+  fabricCanvas.setViewportTransform([1,0,0,1,0,0]);
   fabricCanvas.renderAll();
   var dataURL = fabricCanvas.toDataURL({format:'png',quality:1,multiplier:2});
+  // Restaurar viewport (no necesario ya que se muestra overlay, pero por seguridad)
+  fabricCanvas.setViewportTransform(savedVpt);
+  fabricCanvas.renderAll();
   var data = loadDB();
   if(data[detailIndex]){
     data[detailIndex].mapFinal = dataURL;

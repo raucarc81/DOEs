@@ -1,37 +1,82 @@
-const CACHE = 'does-v14';
+const CACHE = 'does-v15';
 const STATIC_ASSETS = ['./', './index.html', './manifest.json'];
 
 /* ── Genera un icono PNG sintético como ArrayBuffer ── */
 function makePNGIcon(size) {
   const canvas = new OffscreenCanvas(size, size);
   const ctx = canvas.getContext('2d');
-  const r = size * 0.14;
-  // Fondo azul
+  const r = size * 0.18;
+  const cx = size / 2, cy = size / 2;
+
+  // Fondo oscuro táctico
   const bg = ctx.createLinearGradient(0, 0, size, size);
-  bg.addColorStop(0, '#1a5fd4');
-  bg.addColorStop(1, '#026be0');
+  bg.addColorStop(0, '#0a0e1a');
+  bg.addColorStop(1, '#0b1b32');
   ctx.fillStyle = bg;
   ctx.beginPath();
   ctx.roundRect(0, 0, size, size, r);
   ctx.fill();
-  // Escudo blanco simplificado
-  const cx = size / 2, cy = size * 0.46, sw = size * 0.48, sh = size * 0.54;
-  ctx.fillStyle = 'rgba(255,255,255,0.92)';
+
+  // Sirena policial estilizada (luz azul)
+  const sw2 = size;
+  const sh2 = size;
+  // Gradiente de luz azul en el centro
+  const glow = ctx.createRadialGradient(cx, cy*0.7, 0, cx, cy*0.7, size*0.45);
+  glow.addColorStop(0, 'rgba(0,150,255,0.45)');
+  glow.addColorStop(0.5, 'rgba(0,100,220,0.2)');
+  glow.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, size, size);
+
+  // Cuerpo del coche policial simplificado
+  const cw = size * 0.62, ch = size * 0.28;
+  const cx2 = cx - cw/2, cy2 = cy * 0.78 - ch/2;
+  // Carrocería
   ctx.beginPath();
-  ctx.moveTo(cx, cy - sh * 0.5);
-  ctx.lineTo(cx + sw * 0.5, cy - sh * 0.28);
-  ctx.lineTo(cx + sw * 0.5, cy + sh * 0.1);
-  ctx.quadraticCurveTo(cx + sw * 0.5, cy + sh * 0.5, cx, cy + sh * 0.5);
-  ctx.quadraticCurveTo(cx - sw * 0.5, cy + sh * 0.5, cx - sw * 0.5, cy + sh * 0.1);
-  ctx.lineTo(cx - sw * 0.5, cy - sh * 0.28);
-  ctx.closePath();
+  ctx.roundRect(cx2, cy2, cw, ch, size*0.04);
+  ctx.fillStyle = '#1a3060';
   ctx.fill();
-  // Letra D azul dentro del escudo
+  ctx.strokeStyle = '#2a50a0';
+  ctx.lineWidth = size * 0.015;
+  ctx.stroke();
+  // Sirena en el techo
+  const sw3 = size * 0.28, sh3 = size * 0.08;
+  ctx.beginPath();
+  ctx.roundRect(cx - sw3/2, cy2 - sh3 - size*0.02, sw3, sh3, size*0.02);
   ctx.fillStyle = '#026be0';
-  ctx.font = `bold ${size * 0.28}px Arial`;
+  ctx.fill();
+  // Destello azul izquierda
+  ctx.beginPath();
+  ctx.roundRect(cx - sw3/2, cy2 - sh3 - size*0.02, sw3*0.45, sh3, [size*0.02,0,0,size*0.02]);
+  ctx.fillStyle = 'rgba(50,150,255,0.9)';
+  ctx.fill();
+  // Destello rojo derecha
+  ctx.beginPath();
+  ctx.roundRect(cx + sw3*0.05, cy2 - sh3 - size*0.02, sw3*0.45, sh3, [0,size*0.02,size*0.02,0]);
+  ctx.fillStyle = 'rgba(220,50,50,0.85)';
+  ctx.fill();
+
+  // Texto DOEs en la parte inferior
+  const barH = size * 0.26;
+  const barY = size - barH;
+  const barGrad = ctx.createLinearGradient(0, barY, 0, size);
+  barGrad.addColorStop(0, 'rgba(10,14,26,0)');
+  barGrad.addColorStop(0.3, 'rgba(10,14,26,0.88)');
+  barGrad.addColorStop(1, 'rgba(10,14,26,0.97)');
+  ctx.fillStyle = barGrad;
+  ctx.fillRect(0, barY, size, barH);
+
+  const fs = size * 0.22;
+  ctx.font = `bold ${fs}px Arial`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('D', cx, cy + size * 0.01);
+  // Sombra
+  ctx.fillStyle = 'rgba(0,0,0,0.7)';
+  ctx.fillText('DOEs', cx+1.5, size - barH*0.42 + 1.5);
+  // Texto blanco
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText('DOEs', cx, size - barH*0.42);
+
   return canvas.convertToBlob({ type: 'image/png' });
 }
 
